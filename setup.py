@@ -23,5 +23,5 @@ setup(
     author_email='mc_al_github@fastmail.com',
     long_description=README,
     long_description_content_type="text/markdown",
-    url='https://github.com/machow/forcats-py'
+    url='https://github.com/machow/catfact'
     )
