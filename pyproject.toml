@@ -1,0 +1,30 @@
+[build-system]
+requires = ["setuptools>=45", "wheel", "setuptools_scm>=6.2"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools_scm]
+
+[tool.setuptools.packages.find]
+include = ["catfact"]
+
+
+[project]
+name = "catfact"
+description = "Add your description here"
+readme = "README.md"
+keywords = ["factors", "categoricals"]
+requires-python = ">=3.9"
+license.file = "LICENSE"
+dynamic = ["version"]
+dependencies = [
+    "databackend>=0.0.3",
+    "ddispatch>=0.0.1",
+]
+
+[dependency-groups]
+dev = [
+    "ipykernel>=6.29.5",
+    "polars>=1.27.1",
+    "pytest>=8.3.5",
+    "quartodoc>=0.9.1",
+]

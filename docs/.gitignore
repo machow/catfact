@@ -1,0 +1,6 @@
+/.quarto/
+_site
+reference/*
+!reference/.gitfolder
+objects.txt
+_inv

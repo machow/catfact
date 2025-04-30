@@ -1,0 +1,34 @@
+import polars as pl
+from catfact import inorder, infreq, inseq, reorder, to_list, cats
+
+DATA = ["c", "a", "c", "b", "b"]
+# fct_inorder: c, a, b
+# fct_infreq: c, b, a
+# fct_inseq: a, b, c
+
+# TODO: should also assert series length, content, etc..
+
+def test_inorder():
+    res = inorder(pl.Series(DATA))
+    assert to_list(cats(res)) == ["c", "a", "b"]
+
+def test_infreq():
+    res = infreq(pl.Series(DATA))
+    assert to_list(cats(res)) == ["c", "b", "a"]
+
+def test_inseq():
+    res = inseq(pl.Series(DATA))
+    assert to_list(cats(res)) == ["a", "b", "c"]
+
+def test_reorder():
+    # TODO: does this match forcats?
+    fct = pl.Series(DATA)
+    x = pl.Series([1] * len(DATA))
+    res = reorder(fct, x, pl.element().sum())
+
+    assert to_list(cats(res)) == ["a", "c", "b"]
+
+
+    res_desc = reorder(fct, x, pl.element().sum(), desc=True)
+
+    assert to_list(cats(res_desc)) == ["c", "b", "a"]

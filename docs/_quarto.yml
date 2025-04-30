@@ -1,0 +1,48 @@
+project:
+  type: website
+
+# tell quarto to read the generated sidebar
+metadata-files:
+  - reference/_sidebar.yml
+
+# tell quarto to read the generated styles
+format:
+  html:
+    toc: true
+    css:
+      - reference/_styles-quartodoc.css
+  
+interlinks:
+  fast: true
+
+quartodoc:
+  # the name used to import the package you want to create reference docs for
+  package: catfact
+  renderer:
+    style: markdown
+    table_style: description-list
+
+  # write sidebar and style data
+  sidebar: reference/_sidebar.yml
+  css: reference/_styles-quartodoc.css
+  # use description list style for tables
+  
+
+  sections:
+    - title: Level order
+      desc: |
+        Keep the values of the levels the same, but change their order.
+        These are particularly useful for models, tables, and visualisations.
+      contents:
+        - inorder
+        - infreq
+        - reorder
+    - title: Level values
+      desc: |
+        Change factor levels, while preserving order (as much as possible).
+      contents:
+        - recode
+    - title: Other helpers
+      contents:
+        - factor
+        - cats
