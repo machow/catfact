@@ -1,3 +1,4 @@
+import pytest
 import polars as pl
 from catfact import inorder, infreq, inseq, reorder, to_list, cats
 
@@ -19,6 +20,18 @@ def test_infreq():
 def test_inseq():
     res = inseq(pl.Series(DATA))
     assert to_list(cats(res)) == ["a", "b", "c"]
+
+@pytest.mark.parametrize("f", [
+    inorder,
+    infreq,
+    inseq,
+])
+def test_infunc_on_cats(f):
+    res1 = f(pl.Series(["c", "a", "b"]))
+    res2 = f(res1)
+
+    assert res1.dtype == pl.Enum
+    assert res1.equals(res2)
 
 def test_reorder():
     # TODO: does this match forcats?

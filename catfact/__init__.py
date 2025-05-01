@@ -5,13 +5,24 @@ from ._databackend import PlSeries, PlFrame
 from ddispatch import dispatch
 from typing import Any
 
+# For each fct function, need to handle these cases:
+#   - categorical: methods like replace not available.
+#   - non-categorical: methods like replace available, but levels not calculated yet.
+
 
 def _validate_type(x: PlSeries):
-    if not x.dtype.is_(pl.String):
-        raise TypeError()
+    if x.dtype == pl.String or x.dtype == pl.Categorical or x.dtype == pl.Enum:
+        return
+
+    raise TypeError(f"Unsupported Series dtype: {type(x.dtype)}.")
 
 
 def _levels(x: PlSeries) -> PlSeries:
+    """Return levels to use in the creation of a factor."""
+
+    if x.dtype == pl.Categorical or x.dtype == pl.Enum:
+        return x.cat.get_categories()
+
     return x.unique(maintain_order=True).drop_nulls()
 
 
@@ -73,14 +84,18 @@ def _apply_grouped_expr(grouping: PlSeries, x, expr: pl.Expr) -> PlFrame:
 
 
 @dispatch
-def factor(x: PlSeries) -> PlSeries:
+def factor(x: PlSeries, levels: PlSeries | None = None) -> PlSeries:
     """Create a factor, a categorical series whose level order can be specified."""
 
-    _validate_type(x)
+    if levels is None:
+        levels = _levels(x)
+    elif levels.dtype == pl.Categorical or levels.dtype == pl.Enum:
+        levels = levels.cast(pl.String)
 
-    levels = _levels(x)
     return x.cast(pl.Enum(levels))
 
+
+# Level ordering --------------------------------------------------------------
 
 @dispatch
 def inorder(x: PlSeries, ordered=None) -> PlSeries:
@@ -136,14 +151,14 @@ def infreq(fct: PlSeries, ordered=None) -> PlSeries:
 
     levels = fct.value_counts(sort=True).drop_nulls()[fct.name]
 
-    return fct.cast(pl.Enum(levels))
+    return fct.cast(pl.Enum(levels.cast(pl.String)))
 
 @dispatch
 def inseq(x: PlSeries) -> PlSeries:
     """Return a factor with categories ordered lexically (alphabetically)."""
 
     levels = x.unique().drop_nulls().sort()
-    return x.cast(pl.Enum(levels))
+    return x.cast(pl.Enum(levels.cast(pl.String)))
 
 @dispatch
 def reorder(fct: PlSeries, x: PlSeries, func=None, desc=False) -> PlSeries:
