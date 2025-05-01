@@ -1,0 +1,13 @@
+{
+    "editor.rulers": [100],
+    "ruff.enable": true,
+    "ruff.configuration": "",
+    "[python]": {
+        "editor.formatOnSave": true,
+        "editor.defaultFormatter": "charliermarsh.ruff",
+        "editor.codeActionsOnSave": {
+          "source.fixAll": "explicit",
+          "source.organizeImports": "explicit"
+        },
+      },
+}

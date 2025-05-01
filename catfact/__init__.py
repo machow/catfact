@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import polars as pl
+
 from ._databackend import PlSeries, PlFrame
 from ddispatch import dispatch
 from typing import Any
@@ -39,15 +40,18 @@ def _flip_mapping(**kwargs: str | list[str]) -> dict[str, str]:
                 mapping[o] = new
         else:
             raise TypeError(f"Expected str or list, got {type(old)}")
-    
+
     return mapping
+
 
 def _lvls_revalue(fct: PlSeries, old_levels: PlSeries, new_levels: PlSeries) -> PlSeries:
     """Revalue levels of a categorical series."""
     if fct.dtype.is_(pl.Categorical) or fct.dtype.is_(pl.Enum):
         fct = fct.cast(pl.String)
-    
-    return fct.replace_strict(old_levels, new_levels, return_dtype=pl.Enum(new_levels.unique(maintain_order=True)))
+
+    return fct.replace_strict(
+        old_levels, new_levels, return_dtype=pl.Enum(new_levels.unique(maintain_order=True))
+    )
 
 
 @dispatch
@@ -96,6 +100,7 @@ def factor(x: PlSeries, levels: PlSeries | None = None) -> PlSeries:
 
 
 # Level ordering --------------------------------------------------------------
+
 
 @dispatch
 def inorder(x: PlSeries, ordered=None) -> PlSeries:
@@ -153,12 +158,14 @@ def infreq(fct: PlSeries, ordered=None) -> PlSeries:
 
     return fct.cast(pl.Enum(levels.cast(pl.String)))
 
+
 @dispatch
 def inseq(x: PlSeries) -> PlSeries:
     """Return a factor with categories ordered lexically (alphabetically)."""
 
     levels = x.unique().drop_nulls().sort()
     return x.cast(pl.Enum(levels.cast(pl.String)))
+
 
 @dispatch
 def reorder(fct: PlSeries, x: PlSeries, func=None, desc=False) -> PlSeries:
@@ -219,7 +226,7 @@ def collapse(fct: PlSeries, other: str | None = None, /, **kwargs: list[str]):
     replace_map = _flip_mapping(**kwargs)
     # TODO: should it be strict?
     # TODO: will fail for categoricals
-    
+
     levels = [*kwargs, *([other] if other is not None else [])]
     return fct.replace_strict(replace_map, default=other, return_dtype=pl.Enum(levels))
 
@@ -258,7 +265,7 @@ def recode(fct: PlSeries, **kwargs):
 
 
 @dispatch
-def lump_n(fct: PlSeries, n: int = 5, weights = None, other: str = "Other") -> PlSeries:
+def lump_n(fct: PlSeries, n: int = 5, weights=None, other: str = "Other") -> PlSeries:
     """Lump the most common n categories into a single category.
 
     Parameters
@@ -281,12 +288,14 @@ def lump_n(fct: PlSeries, n: int = 5, weights = None, other: str = "Other") -> P
     # order by descending frequency
     ordered = fct.value_counts(sort=True).drop_nulls()[fct.name]
 
-    new_levels = pl.select(res=pl.when(pl.arange(len(ordered)) < n).then(ordered).otherwise(pl.lit(other)))["res"]
-    
+    new_levels = pl.select(
+        res=pl.when(pl.arange(len(ordered)) < n).then(ordered).otherwise(pl.lit(other))
+    )["res"]
+
     releveled = _lvls_revalue(fct, ordered, new_levels)
     # fct_relevel
     if other in releveled.cat.get_categories():
         ordered_levels = [*ordered[:n], other]
         return releveled.cast(pl.Enum(ordered_levels))
-    
+
     return releveled
