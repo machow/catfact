@@ -8,6 +8,7 @@ if TYPE_CHECKING:
 
     PlFrame = pl.DataFrame
     PlSeries = pl.Series
+    PlExpr = pl.Expr
 else:
     import polars  # noqa
 
@@ -16,3 +17,6 @@ else:
 
     class PlSeries(AbstractBackend):
         _backends = [("polars", "Series")]
+
+    class PlExpr(AbstractBackend):
+        _backends = [("polars", "Expr")]

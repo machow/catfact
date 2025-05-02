@@ -9,7 +9,7 @@ from typing import Any
 # For each fct function, need to handle these cases:
 #   - categorical: methods like replace not available.
 #   - non-categorical: methods like replace available, but levels not calculated yet.
-# TODO: fct_shuffle, fct_relevel(after=...), fct_rev, fct_drop, fct_c
+# TODO: fct_shuffle, fct_relevel(after=...), fct_drop, fct_c
 # TODO: note cannot store NA in levels
 
 
@@ -54,6 +54,9 @@ def _lvls_revalue(fct: PlSeries, old_levels: PlSeries, new_levels: PlSeries) -> 
     return fct.replace_strict(
         old_levels, new_levels, return_dtype=pl.Enum(new_levels.unique(maintain_order=True))
     )
+
+
+def _lvls_reorder(fct: PlSeries, idx: PlSeries) -> PlSeries: ...
 
 
 @dispatch
