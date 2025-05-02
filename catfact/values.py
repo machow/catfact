@@ -97,8 +97,8 @@ def lump_n(fct: PlSeries, n: int = 5, weights=None, other: str = "Other") -> PlS
     releveled = _lvls_revalue(fct, ordered, new_levels)
     # fct_relevel
     if other in releveled.cat.get_categories():
-        ordered_levels = [*ordered[:n], other]
-        return releveled.cast(pl.Enum(ordered_levels))
+        uniq_levels = new_levels[: n + 1]
+        return releveled.cast(pl.Enum(uniq_levels))
 
     return releveled
 
@@ -121,17 +121,39 @@ def lump_prop(x: PlSeries, prop: float, weights=None, other="Other") -> PlSeries
     releveled = _lvls_revalue(x, ordered, new_levels)
     # fct_relevel
     if other in releveled.cat.get_categories():
-        ordered_levels = new_levels.unique(maintain_order=True)
-        return releveled.cast(pl.Enum(ordered_levels))
+        uniq_levels = new_levels.unique(maintain_order=True)
+        return releveled.cast(pl.Enum(uniq_levels))
 
     return releveled
 
 
 @dispatch
-def lump_min(x: PlSeries, n, w=None, other="Other") -> PlSeries:
+def lump_min(x: PlSeries, n, weights: PlSeries | None = None, other="Other") -> PlSeries:
     """Lump levels that appear fewer than n times in the series."""
 
 
 @dispatch
-def lump_lowfreq(x: PlSeries, w=None, other="Other") -> PlSeries:
+def lump_lowfreq(x: PlSeries, other="Other") -> PlSeries:
     """Lump low frequency level, keeping other the smallest level."""
+
+    counts = x.value_counts(sort=True).drop_nulls()
+
+    # find index for first count larger than remainder
+    remain = counts["count"].sum()
+    for n, crnt_count in enumerate(counts["count"]):
+        remain -= crnt_count
+        if crnt_count > remain:
+            break
+
+    ordered = counts[x.name]
+    new_levels = pl.select(
+        res=pl.when(pl.arange(len(ordered)) <= n).then(ordered).otherwise(pl.lit(other))
+    )["res"]
+
+    releveled = _lvls_revalue(x, ordered, new_levels)
+    # fct_relevel
+    if other in releveled.cat.get_categories():
+        uniq_levels = new_levels.unique(maintain_order=True)
+        return releveled.cast(pl.Enum(uniq_levels))
+
+    return releveled
