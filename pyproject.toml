@@ -19,7 +19,7 @@ name = "catfact"
 description = "Add your description here"
 readme = "README.md"
 keywords = ["factors", "categoricals"]
-requires-python = ">=3.9"
+requires-python = ">=3.10"
 license.file = "LICENSE"
 dynamic = ["version"]
 dependencies = [
