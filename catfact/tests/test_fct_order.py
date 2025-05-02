@@ -1,7 +1,7 @@
 import math
 import pytest
 import polars as pl
-from catfact import inorder, infreq, inseq, relevel, reorder, to_list, cats
+from catfact import inorder, infreq, inseq, relevel, reorder, rev, to_list, cats
 
 DATA = ["c", "a", "c", "b", "b"]
 # fct_inorder: c, a, b
@@ -76,3 +76,9 @@ def test_reorder():
     res_desc = reorder(fct, x, pl.element().sum(), desc=True)
 
     assert to_list(cats(res_desc)) == ["c", "b", "a"]
+
+
+def test_rev():
+    fct = pl.Series(["a", "b", "c"]).cast(pl.Categorical)
+    res = rev(fct)
+    assert to_list(cats(res)) == ["c", "b", "a"]
