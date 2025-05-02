@@ -1,5 +1,5 @@
 from .misc import dispatch, _flip_mapping, _lvls_revalue
-from ._databackend import polars as pl, PlSeries
+from ._databackend import polars as pl, PlSeries, PlFrame
 
 
 @dispatch
@@ -49,9 +49,21 @@ def recode(fct: PlSeries, **kwargs):
     return collapse(fct, **kwargs)
 
 
+def _calc_lump_sum(x: PlSeries, w: PlSeries | None = None) -> PlFrame:
+    """Return a DataFrame with columns x, calc for grouped sums."""
+
+    return (
+        pl.select(x=x, w=w)
+        .group_by("x", maintain_order=True)
+        .agg(calc=pl.col("w").sum())
+        .sort("calc", descending=True)
+        .drop_nulls()
+    )
+
+
 @dispatch
 def lump_n(fct: PlSeries, n: int = 5, weights=None, other: str = "Other") -> PlSeries:
-    """Lump the most common n categories into a single category.
+    """Lump all levels except the n most frequent.
 
     Parameters
     ----------
@@ -70,8 +82,13 @@ def lump_n(fct: PlSeries, n: int = 5, weights=None, other: str = "Other") -> PlS
         A new series with the most common n categories lumped together.
     """
 
+    # TODO: handle least frequent if n < 0
     # order by descending frequency
-    ordered = fct.value_counts(sort=True).drop_nulls()[fct.name]
+    if weights is None:
+        # likely faster calculation
+        ordered = fct.value_counts(sort=True).drop_nulls()[fct.name]
+    else:
+        ordered = _calc_lump_sum(fct, weights, prop=False)["x"]
 
     new_levels = pl.select(
         res=pl.when(pl.arange(len(ordered)) < n).then(ordered).otherwise(pl.lit(other))
@@ -84,3 +101,37 @@ def lump_n(fct: PlSeries, n: int = 5, weights=None, other: str = "Other") -> PlS
         return releveled.cast(pl.Enum(ordered_levels))
 
     return releveled
+
+
+@dispatch
+def lump_prop(x: PlSeries, prop: float, weights=None, other="Other") -> PlSeries:
+    """Lump levels that appear in fewer than some proportion in the series."""
+
+    x = x.rename("x")
+    if weights is None:
+        props = x.drop_nulls().value_counts(sort=True, normalize=True, name="calc")
+    else:
+        props = _calc_lump_sum(x, weights).with_columns(calc=pl.col("calc") / pl.col("calc").sum())
+
+    ordered = props["x"]
+    new_levels = props.select(
+        res=pl.when(pl.col("calc") >= prop).then(pl.col("x")).otherwise(pl.lit(other))
+    )["res"]
+
+    releveled = _lvls_revalue(x, ordered, new_levels)
+    # fct_relevel
+    if other in releveled.cat.get_categories():
+        ordered_levels = new_levels.unique(maintain_order=True)
+        return releveled.cast(pl.Enum(ordered_levels))
+
+    return releveled
+
+
+@dispatch
+def lump_min(x: PlSeries, n, w=None, other="Other") -> PlSeries:
+    """Lump levels that appear fewer than n times in the series."""
+
+
+@dispatch
+def lump_lowfreq(x: PlSeries, w=None, other="Other") -> PlSeries:
+    """Lump low frequency level, keeping other the smallest level."""
