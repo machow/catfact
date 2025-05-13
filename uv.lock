@@ -87,7 +87,7 @@ wheels = [
 
 [[package]]
 name = "catfact"
-version = "0.1.dev18+g31c36a9"
+version = "0.1.dev24+g4704218.d20250513"
 source = { editable = "." }
 dependencies = [
     { name = "databackend" },

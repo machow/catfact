@@ -1,5 +1,6 @@
 project:
   type: website
+  pre-render: uv run quartodoc build --verbose
 
 # tell quarto to read the generated sidebar
 metadata-files:
@@ -11,7 +12,7 @@ format:
     toc: true
     css:
       - reference/_styles-quartodoc.css
-  
+
 interlinks:
   fast: true
 
@@ -26,7 +27,7 @@ quartodoc:
   sidebar: reference/_sidebar.yml
   css: reference/_styles-quartodoc.css
   # use description list style for tables
-  
+
 
   sections:
     - title: Level order
