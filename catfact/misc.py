@@ -2,15 +2,25 @@ from __future__ import annotations
 
 import polars as pl
 
-from ._databackend import PlSeries
+from ._databackend import PlSeries, PlExpr
 from ddispatch import dispatch
-from typing import Any
+from typing import Any, Callable, ParamSpec, Concatenate
 
 # For each fct function, need to handle these cases:
 #   - categorical: methods like replace not available.
 #   - non-categorical: methods like replace available, but levels not calculated yet.
 # TODO: fct_shuffle, fct_relevel(after=...), fct_drop, fct_c
 # TODO: note cannot store NA in levels
+
+P = ParamSpec("P")
+
+
+def _expr_map_batches(
+    expr: PlExpr, f: Callable[Concatenate[PlSeries, P], PlSeries], *args, **kwargs
+) -> PlExpr:
+    """Partial function for use with map_batches."""
+
+    return expr.map_batches(lambda x: f(x, *args, **kwargs), return_dtype=pl.Enum)
 
 
 def _validate_type(x: PlSeries):

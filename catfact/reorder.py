@@ -1,7 +1,6 @@
 import math
 
-from functools import partial
-from .misc import dispatch, factor, _validate_type, _levels
+from .misc import dispatch, factor, _expr_map_batches, _validate_type, _levels
 from ._databackend import polars as pl, PlSeries, PlFrame, PlExpr
 from typing import Callable
 
@@ -39,8 +38,7 @@ def inorder(x: PlSeries, ordered: bool | None = None) -> PlSeries:
 
 @dispatch
 def inorder(x: PlExpr, ordered: bool | None = None) -> PlExpr:
-    pf = partial(inorder, ordered=ordered)
-    return x.map_batches(pf, return_dtype=pl.Enum)
+    return _expr_map_batches(x, inorder, ordered=ordered)
 
 
 @dispatch
@@ -77,8 +75,7 @@ def infreq(fct: PlSeries, ordered: bool | None = None) -> PlSeries:
 
 @dispatch
 def infreq(x: PlExpr, ordered: bool | None = None) -> PlExpr:
-    pf = partial(infreq, ordered=ordered)
-    return x.map_batches(pf, return_dtype=pl.Enum)
+    return _expr_map_batches(x, infreq, ordered=ordered)
 
 
 @dispatch
@@ -91,8 +88,7 @@ def inseq(x: PlSeries) -> PlSeries:
 
 @dispatch
 def inseq(x: PlExpr) -> PlExpr:
-    pf = partial(inseq)
-    return x.map_batches(pf, return_dtype=pl.Enum)
+    return _expr_map_batches(x, inseq)
 
 
 def _insert_index(lst: list, index, value) -> list:
@@ -148,9 +144,7 @@ def relevel(
     func: Callable[[PlSeries], PlSeries] | None = None,
     index: int | float = math.inf,
 ) -> PlExpr:
-    return fct.map_batches(
-        lambda x: relevel(x, *args, func=func, index=index), return_dtype=pl.Enum
-    )
+    return _expr_map_batches(fct, relevel, *args, func=func, index=index)
 
 
 @dispatch
@@ -205,7 +199,7 @@ def reorder(fct: PlSeries, x: PlSeries, func: PlExpr | None = None, desc: bool =
 
 @dispatch
 def reorder(fct: PlExpr, x: PlExpr, func: PlExpr | None = None, desc: bool = False) -> PlExpr:
-    return fct.map_batches(lambda x: reorder(x, x, func=func, desc=desc), return_dtype=pl.Enum)
+    return _expr_map_batches(fct, reorder, x, func=func, desc=desc)
 
 
 @dispatch
@@ -225,4 +219,4 @@ def rev(fct: PlSeries) -> PlSeries:
 
 @dispatch
 def rev(fct: PlExpr) -> PlExpr:
-    return fct.map_batches(rev, return_dtype=pl.Enum)
+    return _expr_map_batches(fct, rev)
