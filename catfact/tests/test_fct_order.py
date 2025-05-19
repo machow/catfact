@@ -11,19 +11,6 @@ DATA = ["c", "a", "c", "b", "b"]
 # TODO: should also assert series length, content, etc..
 
 
-@pytest.mark.parametrize(
-    "f, data",
-    [(inorder, ["b", "c", "a"]), (infreq, ["b", "c", "c", "a"]), (inseq, ["b", "c", "a"])],
-)
-def test_expr(f, data):
-    x = pl.Series(data)
-    dst = f(x)
-    res = pl.DataFrame({"x": x}).with_columns(res=f(pl.col("x")))["res"]
-
-    assert res.dtype == dst.dtype
-    assert res.equals(dst)
-
-
 def test_inorder():
     res = inorder(pl.Series(DATA))
     assert to_list(cats(res)) == ["c", "a", "b"]
@@ -95,3 +82,47 @@ def test_rev():
     fct = pl.Series(["a", "b", "c"]).cast(pl.Categorical)
     res = rev(fct)
     assert to_list(cats(res)) == ["c", "b", "a"]
+
+
+# Expression tests ------------------------------------------------------------
+
+
+@pytest.mark.parametrize(
+    "f, data",
+    [
+        (inorder, ["b", "c", "a"]),
+        (infreq, ["b", "c", "c", "a"]),
+        (inseq, ["b", "c", "a"]),
+        (rev, ["b", "c", "a"]),
+    ],
+)
+def test_expr_simple(f, data):
+    x = pl.Series(data)
+    dst = f(x)
+    res = pl.DataFrame({"x": x}).with_columns(res=f(pl.col("x")))["res"]
+
+    assert res.dtype == dst.dtype
+    assert res.equals(dst)
+
+
+def test_expr_relevel():
+    x = pl.Series(["a", "b", "c"])
+
+    dst = relevel(x, "b", index=0)
+    res = pl.DataFrame({"x": x}).with_columns(res=relevel(pl.col("x"), "b", index=0))["res"]
+
+    assert res.dtype == dst.dtype
+    assert res.equals(dst)
+
+
+def test_expr_reorder():
+    x = pl.Series(DATA)
+    y = pl.Series([1] * len(DATA))
+    func = pl.element().sum()
+    dst = reorder(x, y, func)
+    res = pl.DataFrame({"x": x, "y": y}).with_columns(res=reorder(pl.col("x"), pl.col("y"), func))[
+        "res"
+    ]
+
+    assert res.dtype == dst.dtype
+    assert res.equals(dst)

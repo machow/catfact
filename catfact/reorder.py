@@ -199,7 +199,7 @@ def reorder(fct: PlSeries, x: PlSeries, func: PlExpr | None = None, desc: bool =
 
 @dispatch
 def reorder(fct: PlExpr, x: PlExpr, func: PlExpr | None = None, desc: bool = False) -> PlExpr:
-    return _expr_map_batches(fct, reorder, x, func=func, desc=desc)
+    return pl.map_batches([fct, x], lambda sers: reorder(sers[0], sers[1], func=func, desc=desc))
 
 
 @dispatch
