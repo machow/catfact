@@ -11,6 +11,19 @@ DATA = ["c", "a", "c", "b", "b"]
 # TODO: should also assert series length, content, etc..
 
 
+@pytest.mark.parametrize(
+    "f, data",
+    [(inorder, ["b", "c", "a"]), (infreq, ["b", "c", "c", "a"]), (inseq, ["b", "c", "a"])],
+)
+def test_expr(f, data):
+    x = pl.Series(data)
+    dst = f(x)
+    res = pl.DataFrame({"x": x}).with_columns(res=f(pl.col("x")))["res"]
+
+    assert res.dtype == dst.dtype
+    assert res.equals(dst)
+
+
 def test_inorder():
     res = inorder(pl.Series(DATA))
     assert to_list(cats(res)) == ["c", "a", "b"]

@@ -11,6 +11,7 @@ include = ["catfact"]
 line-length = 100
 
 [tool.ruff.lint]
+ignore = ["F811"]
 
 [tool.ruff.format]
 
