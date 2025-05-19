@@ -1,6 +1,6 @@
 import math
 
-from .misc import dispatch, factor, _validate_type, _levels
+from .misc import dispatch, factor, _expr_map_batches, _validate_type, _levels
 from ._databackend import polars as pl, PlSeries, PlFrame, PlExpr
 from typing import Callable
 
@@ -12,7 +12,7 @@ def _apply_grouped_expr(grouping: PlSeries, x, expr: PlExpr) -> PlFrame:
 
 
 @dispatch
-def inorder(x: PlSeries, ordered=None) -> PlSeries:
+def inorder(x: PlSeries, ordered: bool | None = None) -> PlSeries:
     """Return factor with categories ordered by when they first appear.
 
     Parameters
@@ -37,12 +37,17 @@ def inorder(x: PlSeries, ordered=None) -> PlSeries:
 
 
 @dispatch
-def infreq(fct: PlSeries, ordered=None) -> PlSeries:
+def inorder(x: PlExpr, ordered: bool | None = None) -> PlExpr:
+    return _expr_map_batches(x, inorder, ordered=ordered)
+
+
+@dispatch
+def infreq(fct: PlSeries, ordered: bool | None = None) -> PlSeries:
     """Return a factor with categories ordered by frequency (largest first)
 
     Parameters
     ----------
-    fct : list-like
+    x : list-like
         A pandas Series, Categorical, or list-like object
     ordered : bool
         Whether to return an ordered categorical. By default a Categorical inputs'
@@ -69,11 +74,21 @@ def infreq(fct: PlSeries, ordered=None) -> PlSeries:
 
 
 @dispatch
+def infreq(x: PlExpr, ordered: bool | None = None) -> PlExpr:
+    return _expr_map_batches(x, infreq, ordered=ordered)
+
+
+@dispatch
 def inseq(x: PlSeries) -> PlSeries:
     """Return a factor with categories ordered lexically (alphabetically)."""
 
     levels = x.unique().drop_nulls().sort()
     return x.cast(pl.Enum(levels.cast(pl.String)))
+
+
+@dispatch
+def inseq(x: PlExpr) -> PlExpr:
+    return _expr_map_batches(x, inseq)
 
 
 def _insert_index(lst: list, index, value) -> list:
@@ -97,6 +112,7 @@ def _insert_index(lst: list, index, value) -> list:
     return res
 
 
+@dispatch
 def relevel(
     fct: PlSeries,
     *args,
@@ -122,7 +138,17 @@ def relevel(
 
 
 @dispatch
-def reorder(fct: PlSeries, x: PlSeries, func=None, desc=False) -> PlSeries:
+def relevel(
+    fct: PlExpr,
+    *args,
+    func: Callable[[PlSeries], PlSeries] | None = None,
+    index: int | float = math.inf,
+) -> PlExpr:
+    return _expr_map_batches(fct, relevel, *args, func=func, index=index)
+
+
+@dispatch
+def reorder(fct: PlSeries, x: PlSeries, func: PlExpr | None = None, desc: bool = False) -> PlSeries:
     """Return copy of fct, with categories reordered according to values in x.
 
     Parameters
@@ -172,6 +198,11 @@ def reorder(fct: PlSeries, x: PlSeries, func=None, desc=False) -> PlSeries:
 
 
 @dispatch
+def reorder(fct: PlExpr, x: PlExpr, func: PlExpr | None = None, desc: bool = False) -> PlExpr:
+    return pl.map_batches([fct, x], lambda sers: reorder(sers[0], sers[1], func=func, desc=desc))
+
+
+@dispatch
 def rev(fct: PlSeries) -> PlSeries:
     """Reverse the order of a factor's levels.
 
@@ -184,3 +215,8 @@ def rev(fct: PlSeries) -> PlSeries:
 
     res = factor(fct)
     return res.cast(pl.Enum(res.cat.get_categories().reverse()))
+
+
+@dispatch
+def rev(fct: PlExpr) -> PlExpr:
+    return _expr_map_batches(fct, rev)
