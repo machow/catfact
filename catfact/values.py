@@ -3,6 +3,11 @@ from ._databackend import polars as pl, PlExpr, PlSeries, PlFrame
 
 
 @dispatch
+def collapse(fct: PlExpr, other: str | None = None, /, **kwargs: list[str]):
+    return _expr_map_batches(fct, collapse, other, **kwargs)
+
+
+@dispatch
 def collapse(fct: PlSeries, other: str | None = None, /, **kwargs: list[str]):
     # Polars does not allow using .replace on categoricals
     # so we need to change the string values themselves
@@ -17,8 +22,8 @@ def collapse(fct: PlSeries, other: str | None = None, /, **kwargs: list[str]):
 
 
 @dispatch
-def collapse(fct: PlExpr, other: str | None = None, /, **kwargs: list[str]):
-    return _expr_map_batches(fct, collapse, other, **kwargs)
+def recode(fct: PlExpr, **kwargs):
+    return _expr_map_batches(fct, recode, **kwargs)
 
 
 @dispatch
@@ -54,11 +59,6 @@ def recode(fct: PlSeries, **kwargs):
     return collapse(fct, **kwargs)
 
 
-@dispatch
-def recode(fct: PlExpr, **kwargs):
-    return _expr_map_batches(fct, recode, **kwargs)
-
-
 def _calc_lump_sum(x: PlSeries, w: PlSeries | None = None) -> PlFrame:
     """Return a DataFrame with columns x, calc for grouped sums."""
 
@@ -69,6 +69,18 @@ def _calc_lump_sum(x: PlSeries, w: PlSeries | None = None) -> PlFrame:
         .sort("calc", descending=True)
         .drop_nulls()
     )
+
+
+@dispatch
+def lump_n(fct: PlExpr, n: int = 5, weights: PlExpr | None = None, other: str = "Other") -> PlExpr:
+    if weights is not None:
+        return pl.map_batches(
+            [fct, weights],
+            lambda sers: lump_n(sers[0], n, sers[1], other=other),
+            return_dtype=pl.Enum,
+        )
+
+    return _expr_map_batches(fct, lump_n, n, weights, other)
 
 
 @dispatch
@@ -116,15 +128,8 @@ def lump_n(
 
 
 @dispatch
-def lump_n(fct: PlExpr, n: int = 5, weights: PlExpr | None = None, other: str = "Other") -> PlExpr:
-    if weights is not None:
-        return pl.map_batches(
-            [fct, weights],
-            lambda sers: lump_n(sers[0], n, sers[1], other=other),
-            return_dtype=pl.Enum,
-        )
-
-    return _expr_map_batches(fct, lump_n, n, weights, other)
+def lump_prop(x: PlExpr, prop: float, weights=None, other="Other") -> PlExpr:
+    return _expr_map_batches(x, lump_prop, prop=prop, weights=weights, other=other)
 
 
 @dispatch
@@ -152,17 +157,6 @@ def lump_prop(x: PlSeries, prop: float, weights=None, other="Other") -> PlSeries
 
 
 @dispatch
-def lump_prop(x: PlExpr, prop: float, weights=None, other="Other") -> PlExpr:
-    return _expr_map_batches(x, lump_prop, prop=prop, weights=weights, other=other)
-
-
-@dispatch
-def lump_min(x: PlSeries, n, weights: PlSeries | None = None, other="Other") -> PlSeries:
-    """Lump levels that appear fewer than n times in the series."""
-    raise NotImplementedError()
-
-
-@dispatch
 def lump_min(x: PlExpr, n, weights: PlExpr | None = None, other="Other") -> PlExpr:
     if weights is not None:
         return pl.map_batches(
@@ -172,6 +166,17 @@ def lump_min(x: PlExpr, n, weights: PlExpr | None = None, other="Other") -> PlEx
         )
 
     return _expr_map_batches(x, lump_min, n, weights, other)
+
+
+@dispatch
+def lump_min(x: PlSeries, n, weights: PlSeries | None = None, other="Other") -> PlSeries:
+    """Lump levels that appear fewer than n times in the series."""
+    raise NotImplementedError()
+
+
+@dispatch
+def lump_lowfreq(x: PlExpr, other="Other") -> PlExpr:
+    return _expr_map_batches(x, lump_lowfreq, other=other)
 
 
 @dispatch
@@ -199,8 +204,3 @@ def lump_lowfreq(x: PlSeries, other="Other") -> PlSeries:
         return releveled.cast(pl.Enum(uniq_levels))
 
     return releveled
-
-
-@dispatch
-def lump_lowfreq(x: PlExpr, other="Other") -> PlExpr:
-    return _expr_map_batches(x, lump_lowfreq, other=other)

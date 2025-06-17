@@ -194,12 +194,26 @@ def reorder(fct: PlSeries, x: PlSeries, func: PlExpr | None = None, desc: bool =
         raise NotImplementedError("Currently, x must be a polars.Series")
 
     levels = cat_aggs.sort("calc", descending=desc)["grouping"].drop_nulls()
-    return fct.cast(pl.Enum(levels))
+    res = factor(fct.cast(pl.String), levels)
+    return res
 
 
 @dispatch
 def reorder(fct: PlExpr, x: PlExpr, func: PlExpr | None = None, desc: bool = False) -> PlExpr:
-    return pl.map_batches([fct, x], lambda sers: reorder(sers[0], sers[1], func=func, desc=desc))
+    # return pl.map_batches([fct, x], lambda sers: reorder(sers[0], sers[1], func=func, desc=desc))
+
+    # we need to use the struct .map_batches method
+    # which has is_elementwise=False, so that the function
+    # does not execute once per chunk (since the final levels
+    # depend on all the values in the Series).
+    return pl.struct([fct.alias("field_0"), x.alias("field_1")]).map_batches(
+        lambda struct_series: reorder(
+            struct_series.struct.field("field_0"),
+            struct_series.struct.field("field_1"),
+            func=func,
+            desc=desc,
+        )
+    )
 
 
 @dispatch
