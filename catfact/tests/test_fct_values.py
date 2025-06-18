@@ -80,3 +80,51 @@ def test_lump_lowfreq():
 
     res3 = lump_lowfreq(pl.Series(["b", "a", "a", "a", "c"]))
     assert to_list(cats(res3)) == ["a", "Other"]
+
+
+# Expressions -----------------------------------------------------------------
+
+
+def test_collapse_expr():
+    ser = pl.Series(DATA)
+    kwargs = dict(low=["Low", "Low-ish"], high=["High", "Very High"])
+
+    dst = collapse(ser, low=["Low", "Low-ish"], high=["High", "Very High"])
+    res = pl.DataFrame({"x": ser}).with_columns(res=collapse(pl.col("x"), **kwargs))["res"]
+
+    assert res.equals(dst)
+    assert res.dtype == dst.dtype
+
+
+def test_recode_expr():
+    ser = pl.Series(DATA)
+    kwargs = dict(low="Low", high="High")
+
+    dst = recode(ser, **kwargs)
+    res = pl.DataFrame({"x": ser}).with_columns(res=recode(pl.col("x"), **kwargs))["res"]
+
+    assert res.equals(dst)
+    assert res.dtype == dst.dtype
+
+
+def test_lump_n_expr():
+    ser = pl.Series(["b", "a", "a", "a", "c", "c"])
+
+    dst = lump_n(ser, n=2)
+    res = pl.DataFrame({"x": ser}).with_columns(res=lump_n(pl.col("x"), n=2))["res"]
+
+    assert res.equals(dst)
+    assert res.dtype == dst.dtype
+
+
+def test_lump_n_expr_weights():
+    ser = pl.Series(["b", "a", "a", "a", "c", "c"])
+    weights = pl.Series([1, 2, 3, 4, 5, 6])
+
+    dst = lump_n(ser, n=2, weights=weights)
+    res = pl.DataFrame({"x": ser, "weights": weights}).with_columns(
+        res=lump_n(pl.col("x"), n=2, weights=pl.col("weights"))
+    )["res"]
+
+    assert res.equals(dst)
+    assert res.dtype == dst.dtype

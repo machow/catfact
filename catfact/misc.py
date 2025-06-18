@@ -2,15 +2,28 @@ from __future__ import annotations
 
 import polars as pl
 
-from ._databackend import PlSeries
+from ._databackend import PlSeries, PlExpr
 from ddispatch import dispatch
-from typing import Any
+from typing import Any, Callable, ParamSpec, Concatenate
 
 # For each fct function, need to handle these cases:
 #   - categorical: methods like replace not available.
 #   - non-categorical: methods like replace available, but levels not calculated yet.
 # TODO: fct_shuffle, fct_relevel(after=...), fct_drop, fct_c
 # TODO: note cannot store NA in levels
+
+P = ParamSpec("P")
+
+
+def _expr_map_batches(
+    expr: PlExpr, f: Callable[Concatenate[PlSeries, P], PlSeries], *args, **kwargs
+) -> PlExpr:
+    """Partial function for use with map_batches."""
+
+    # TODO: currently, there is no way to specify the return_dtype, since
+    # Polars expects levels to be part of the dtype, and it appears some
+    # parts of Polars fail if levels are not specified.
+    return expr.map_batches(lambda x: f(x, *args, **kwargs), is_elementwise=False)
 
 
 def _validate_type(x: PlSeries):
@@ -57,6 +70,10 @@ def _lvls_revalue(fct: PlSeries, old_levels: PlSeries, new_levels: PlSeries) -> 
 
 
 def _lvls_reorder(fct: PlSeries, idx: PlSeries) -> PlSeries: ...
+
+
+def _is_enum_or_cat(levels: PlSeries) -> bool:
+    return levels.dtype == pl.Categorical or levels.dtype == pl.Enum
 
 
 @dispatch

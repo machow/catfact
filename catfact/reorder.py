@@ -1,6 +1,6 @@
 import math
 
-from .misc import dispatch, factor, _validate_type, _levels
+from .misc import dispatch, factor, _expr_map_batches, _validate_type, _levels, _is_enum_or_cat
 from ._databackend import polars as pl, PlSeries, PlFrame, PlExpr
 from typing import Callable
 
@@ -12,7 +12,12 @@ def _apply_grouped_expr(grouping: PlSeries, x, expr: PlExpr) -> PlFrame:
 
 
 @dispatch
-def inorder(x: PlSeries, ordered=None) -> PlSeries:
+def inorder(fct: PlExpr, ordered: bool | None = None) -> PlExpr:
+    return _expr_map_batches(fct, inorder, ordered=ordered)
+
+
+@dispatch
+def inorder(fct: PlSeries, ordered: bool | None = None) -> PlSeries:
     """Return factor with categories ordered by when they first appear.
 
     Parameters
@@ -25,7 +30,7 @@ def inorder(x: PlSeries, ordered=None) -> PlSeries:
 
     See Also
     --------
-    fct_infreq : Order categories by value frequency count.
+    fct.infreq : Order categories by value frequency count.
 
     """
     # TODO: warn that polars has no ordered mode
@@ -33,31 +38,32 @@ def inorder(x: PlSeries, ordered=None) -> PlSeries:
     if ordered is not None:
         raise NotImplementedError()
 
-    return factor(x)
+    if _is_enum_or_cat(fct):
+        return factor(fct, levels=fct.unique(maintain_order=True))
+
+    return factor(fct)
 
 
 @dispatch
-def infreq(fct: PlSeries, ordered=None) -> PlSeries:
+def infreq(fct: PlExpr, ordered: bool | None = None) -> PlExpr:
+    return _expr_map_batches(fct, infreq, ordered=ordered)
+
+
+@dispatch
+def infreq(fct: PlSeries, ordered: bool | None = None) -> PlSeries:
     """Return a factor with categories ordered by frequency (largest first)
 
     Parameters
     ----------
-    fct : list-like
-        A pandas Series, Categorical, or list-like object
+    fct :
+        A Series or Expression
     ordered : bool
         Whether to return an ordered categorical. By default a Categorical inputs'
         ordered setting is respected. Use this to override it.
 
     See Also
     --------
-    fct_inorder : Order categories by when they're first observed.
-
-    Examples
-    --------
-
-    >>> fct_infreq(["c", "a", "c", "c", "a", "b"])
-    ['c', 'a', 'c', 'c', 'a', 'b']
-    Categories (3, object): ['c', 'a', 'b']
+    fct.inorder : Order categories by when they're first observed.
 
     """
 
@@ -65,15 +71,12 @@ def infreq(fct: PlSeries, ordered=None) -> PlSeries:
 
     levels = fct.value_counts(sort=True).drop_nulls()[fct.name]
 
-    return fct.cast(pl.Enum(levels.cast(pl.String)))
+    return factor(fct, levels)
 
 
 @dispatch
-def inseq(x: PlSeries) -> PlSeries:
-    """Return a factor with categories ordered lexically (alphabetically)."""
-
-    levels = x.unique().drop_nulls().sort()
-    return x.cast(pl.Enum(levels.cast(pl.String)))
+def inseq(fct: PlExpr) -> PlExpr:
+    return _expr_map_batches(fct, inseq)
 
 
 def _insert_index(lst: list, index, value) -> list:
@@ -97,6 +100,28 @@ def _insert_index(lst: list, index, value) -> list:
     return res
 
 
+@dispatch
+def inseq(fct: PlSeries) -> PlSeries:
+    """Return a factor with categories ordered lexically (alphabetically)."""
+
+    if _is_enum_or_cat(fct):
+        return factor(fct, levels=fct.cat.get_categories().sort())
+
+    levels = fct.unique().drop_nulls().sort()
+    return factor(fct, levels)
+
+
+@dispatch
+def relevel(
+    fct: PlExpr,
+    *args,
+    func: Callable[[PlSeries], PlSeries] | None = None,
+    index: int | float = math.inf,
+) -> PlExpr:
+    return _expr_map_batches(fct, relevel, *args, func=func, index=index)
+
+
+@dispatch
 def relevel(
     fct: PlSeries,
     *args,
@@ -122,7 +147,25 @@ def relevel(
 
 
 @dispatch
-def reorder(fct: PlSeries, x: PlSeries, func=None, desc=False) -> PlSeries:
+def reorder(fct: PlExpr, x: PlExpr, func: PlExpr | None = None, desc: bool = False) -> PlExpr:
+    # return pl.map_batches([fct, x], lambda sers: reorder(sers[0], sers[1], func=func, desc=desc))
+
+    # we need to use the struct .map_batches method
+    # which has is_elementwise=False, so that the function
+    # does not execute once per chunk (since the final levels
+    # depend on all the values in the Series).
+    return pl.struct([fct.alias("field_0"), x.alias("field_1")]).map_batches(
+        lambda struct_series: reorder(
+            struct_series.struct.field("field_0"),
+            struct_series.struct.field("field_1"),
+            func=func,
+            desc=desc,
+        )
+    )
+
+
+@dispatch
+def reorder(fct: PlSeries, x: PlSeries, func: PlExpr | None = None, desc: bool = False) -> PlSeries:
     """Return copy of fct, with categories reordered according to values in x.
 
     Parameters
@@ -136,27 +179,6 @@ def reorder(fct: PlSeries, x: PlSeries, func=None, desc=False) -> PlSeries:
     desc :
         Whether to sort in descending order.
 
-    Notes
-    -----
-    NaN categories can't be ordered. When func returns NaN, sorting
-    is always done with NaNs last.
-
-
-    Examples
-    --------
-
-    >>> fct_reorder(['a', 'a', 'b'], [4, 3, 2])
-    ['a', 'a', 'b']
-    Categories (2, object): ['b', 'a']
-
-    >>> fct_reorder(['a', 'a', 'b'], [4, 3, 2], desc = True)
-    ['a', 'a', 'b']
-    Categories (2, object): ['a', 'b']
-
-    >>> fct_reorder(['x', 'x', 'y'], [4, 0, 2], np.max)
-    ['x', 'x', 'y']
-    Categories (2, object): ['y', 'x']
-
     """
 
     if func is None:
@@ -168,7 +190,13 @@ def reorder(fct: PlSeries, x: PlSeries, func=None, desc=False) -> PlSeries:
         raise NotImplementedError("Currently, x must be a polars.Series")
 
     levels = cat_aggs.sort("calc", descending=desc)["grouping"].drop_nulls()
-    return fct.cast(pl.Enum(levels))
+    res = factor(fct.cast(pl.String), levels)
+    return res
+
+
+@dispatch
+def rev(fct: PlExpr) -> PlExpr:
+    return _expr_map_batches(fct, rev)
 
 
 @dispatch
@@ -178,7 +206,7 @@ def rev(fct: PlSeries) -> PlSeries:
     Parameters
     ----------
     fct :
-        A Series to return as a factor.
+        A Series
 
     """
 

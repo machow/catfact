@@ -1,0 +1,10 @@
+/* styles for parameter tables, etc.. ----
+*/
+
+.table.dataframe {
+    width: auto;
+}
+
+.table.dataframe thead tr:nth-child(2) {
+    color: #777777;
+}
