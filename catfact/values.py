@@ -33,7 +33,7 @@ def recode(fct: PlSeries, **kwargs):
     Parameters
     ----------
     fct :
-        A pandas.Categorical, or array(-like) used to create one.
+        A Series
     **kwargs :
         Arguments of form new_name = old_name.
 
@@ -128,26 +128,28 @@ def lump_n(
 
 
 @dispatch
-def lump_prop(x: PlExpr, prop: float, weights=None, other="Other") -> PlExpr:
-    return _expr_map_batches(x, lump_prop, prop=prop, weights=weights, other=other)
+def lump_prop(fct: PlExpr, prop: float, weights=None, other="Other") -> PlExpr:
+    return _expr_map_batches(fct, lump_prop, prop=prop, weights=weights, other=other)
 
 
 @dispatch
-def lump_prop(x: PlSeries, prop: float, weights=None, other="Other") -> PlSeries:
+def lump_prop(fct: PlSeries, prop: float, weights=None, other="Other") -> PlSeries:
     """Lump levels that appear in fewer than some proportion in the series."""
 
-    x = x.rename("x")
+    fct = fct.rename("x")
     if weights is None:
-        props = x.drop_nulls().value_counts(sort=True, normalize=True, name="calc")
+        props = fct.drop_nulls().value_counts(sort=True, normalize=True, name="calc")
     else:
-        props = _calc_lump_sum(x, weights).with_columns(calc=pl.col("calc") / pl.col("calc").sum())
+        props = _calc_lump_sum(fct, weights).with_columns(
+            calc=pl.col("calc") / pl.col("calc").sum()
+        )
 
     ordered = props["x"]
     new_levels = props.select(
         res=pl.when(pl.col("calc") >= prop).then(pl.col("x")).otherwise(pl.lit(other))
     )["res"]
 
-    releveled = _lvls_revalue(x, ordered, new_levels)
+    releveled = _lvls_revalue(fct, ordered, new_levels)
     # fct_relevel
     if other in releveled.cat.get_categories():
         uniq_levels = new_levels.unique(maintain_order=True)
@@ -157,33 +159,33 @@ def lump_prop(x: PlSeries, prop: float, weights=None, other="Other") -> PlSeries
 
 
 @dispatch
-def lump_min(x: PlExpr, n, weights: PlExpr | None = None, other="Other") -> PlExpr:
+def lump_min(fct: PlExpr, n, weights: PlExpr | None = None, other="Other") -> PlExpr:
     if weights is not None:
         return pl.map_batches(
-            [x, weights],
+            [fct, weights],
             lambda sers: lump_min(sers[0], n, sers[1], other=other),
             return_dtype=pl.Enum,
         )
 
-    return _expr_map_batches(x, lump_min, n, weights, other)
+    return _expr_map_batches(fct, lump_min, n, weights, other)
 
 
 @dispatch
-def lump_min(x: PlSeries, n, weights: PlSeries | None = None, other="Other") -> PlSeries:
+def lump_min(fct: PlSeries, n, weights: PlSeries | None = None, other="Other") -> PlSeries:
     """Lump levels that appear fewer than n times in the series."""
     raise NotImplementedError()
 
 
 @dispatch
-def lump_lowfreq(x: PlExpr, other="Other") -> PlExpr:
-    return _expr_map_batches(x, lump_lowfreq, other=other)
+def lump_lowfreq(fct: PlExpr, other="Other") -> PlExpr:
+    return _expr_map_batches(fct, lump_lowfreq, other=other)
 
 
 @dispatch
-def lump_lowfreq(x: PlSeries, other="Other") -> PlSeries:
+def lump_lowfreq(fct: PlSeries, other="Other") -> PlSeries:
     """Lump low frequency level, keeping other the smallest level."""
 
-    counts = x.value_counts(sort=True).drop_nulls()
+    counts = fct.value_counts(sort=True).drop_nulls()
 
     # find index for first count larger than remainder
     remain = counts["count"].sum()
@@ -192,12 +194,12 @@ def lump_lowfreq(x: PlSeries, other="Other") -> PlSeries:
         if crnt_count > remain:
             break
 
-    ordered = counts[x.name]
+    ordered = counts[fct.name]
     new_levels = pl.select(
         res=pl.when(pl.arange(len(ordered)) <= n).then(ordered).otherwise(pl.lit(other))
     )["res"]
 
-    releveled = _lvls_revalue(x, ordered, new_levels)
+    releveled = _lvls_revalue(fct, ordered, new_levels)
     # fct_relevel
     if other in releveled.cat.get_categories():
         uniq_levels = new_levels.unique(maintain_order=True)

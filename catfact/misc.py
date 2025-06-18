@@ -20,7 +20,10 @@ def _expr_map_batches(
 ) -> PlExpr:
     """Partial function for use with map_batches."""
 
-    return expr.map_batches(lambda x: f(x, *args, **kwargs), return_dtype=pl.Enum)
+    # TODO: currently, there is no way to specify the return_dtype, since
+    # Polars expects levels to be part of the dtype, and it appears some
+    # parts of Polars fail if levels are not specified.
+    return expr.map_batches(lambda x: f(x, *args, **kwargs), is_elementwise=False)
 
 
 def _validate_type(x: PlSeries):
@@ -67,6 +70,10 @@ def _lvls_revalue(fct: PlSeries, old_levels: PlSeries, new_levels: PlSeries) -> 
 
 
 def _lvls_reorder(fct: PlSeries, idx: PlSeries) -> PlSeries: ...
+
+
+def _is_enum_or_cat(levels: PlSeries) -> bool:
+    return levels.dtype == pl.Categorical or levels.dtype == pl.Enum
 
 
 @dispatch

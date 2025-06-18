@@ -15,15 +15,27 @@ def test_inorder():
     res = inorder(pl.Series(DATA))
     assert to_list(cats(res)) == ["c", "a", "b"]
 
+    # works with factors
+    lexical = pl.Series(["b", "a"], dtype=pl.Enum(["a", "b"]))
+    assert to_list(cats(inorder(lexical))) == ["b", "a"]
+
 
 def test_infreq():
     res = infreq(pl.Series(DATA))
     assert to_list(cats(res)) == ["c", "b", "a"]
 
+    # works with factors
+    lexical = pl.Series(["b", "a", "b"], dtype=pl.Enum(["a", "b"]))
+    assert to_list(cats(infreq(lexical))) == ["b", "a"]
+
 
 def test_inseq():
     res = inseq(pl.Series(DATA))
     assert to_list(cats(res)) == ["a", "b", "c"]
+
+    # works with factors
+    lexical = pl.Series(["1", "2"], dtype=pl.Enum(["2", "1"]))
+    assert to_list(cats(inseq(lexical))) == ["1", "2"]
 
 
 @pytest.mark.parametrize(
@@ -34,7 +46,7 @@ def test_inseq():
         inseq,
     ],
 )
-def test_infunc_on_cats(f):
+def test_infunc_called_twice_identical(f):
     res1 = f(pl.Series(["c", "a", "b"]))
     res2 = f(res1)
 
@@ -55,7 +67,7 @@ def test_relevel():
     assert to_list(cats(res3)) == ["c", "b", "a"]
 
 
-def test_relevel_func():
+def test_relevel_func_arg():
     fct = pl.Series(["a", "a", "b", "c"]).cast(pl.Categorical)
 
     res = relevel(fct, func=lambda x: x.reverse())
