@@ -26,11 +26,14 @@ dynamic = ["version"]
 dependencies = [
     "databackend>=0.0.3",
     "ddispatch>=0.0.1",
+    "polars",
 ]
 
 [dependency-groups]
 dev = [
     "ipykernel>=6.29.5",
+    "nbclient>=0.10.2",
+    "nbformat>=5.10.4",
     "pandas>=2.2.3",
     "plotnine>=0.13.6",
     "polars>=1.27.1",
