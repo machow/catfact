@@ -42,7 +42,7 @@ Suppose you have a Polars Categorical Series. You can get the category levels wi
 
 ```{python}
 counts = pl.Series(["z", "z", "a", "b"], dtype=pl.Categorical)
-counts.cat.get_categories()
+counts.cat.get_categories().to_list()
 ```
 
 Notice that the categories are ordered by when they first appear. Since `"z"` is the first element of the Series, it's also the first category.
@@ -51,7 +51,7 @@ catfact provides functions like `fct.inseq()`, which orders categories alphabeti
 
 ```{python}
 count_seq = fct.inseq(counts)
-fct.cats(count_seq)
+fct.cats(count_seq).to_list()
 ```
 
 :::{.callout-note title="Using the Polars fct namespace"}

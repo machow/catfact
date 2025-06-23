@@ -17,6 +17,16 @@ website:
         href: guide/overview.qmd
       - text: Reference
         href: reference/index.qmd
+  sidebar:
+    - id: Get Started
+      title: Get Started
+      contents:
+      - file: guide/overview.qmd
+      - section: Frame libraries
+        contents:
+          - file: guide/fct-namespace.qmd
+          - file: guide/polars.qmd
+          - file: guide/pandas.qmd
 
 # tell quarto to read the generated styles
 format:
