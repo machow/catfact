@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import polars as pl
 
-from ._databackend import PlSeries, PlExpr
+from ._databackend import PdSeriesOrCat, PlSeries, PlExpr
 from ddispatch import dispatch
 from typing import Any, Callable, ParamSpec, Concatenate
 
@@ -74,6 +74,27 @@ def _lvls_reorder(fct: PlSeries, idx: PlSeries) -> PlSeries: ...
 
 def _is_enum_or_cat(levels: PlSeries) -> bool:
     return levels.dtype == pl.Categorical or levels.dtype == pl.Enum
+
+
+@dispatch
+def is_ordered(x: PdSeriesOrCat):
+    import pandas as pd
+
+    if isinstance(x, pd.Categorical):
+        return x.ordered
+    elif isinstance(x, pd.Series) and pd.api.types.is_categorical_dtype(x):
+        return x.cat.ordered
+
+    return None
+
+
+@dispatch
+def is_ordered(x: PlSeries):
+    """Check if a Polars Series is ordered."""
+
+    raise NotImplementedError(
+        "Polars Categorical and Enum dtypes do not support an `ordered` flag attribute."
+    )
 
 
 @dispatch

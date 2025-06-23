@@ -1,7 +1,15 @@
 import math
 
-from .misc import dispatch, factor, _expr_map_batches, _validate_type, _levels, _is_enum_or_cat
-from ._databackend import polars as pl, PlSeries, PlFrame, PlExpr
+from .misc import (
+    _expr_map_batches,
+    _validate_type,
+    _levels,
+    _is_enum_or_cat,
+    dispatch,
+    factor,
+    is_ordered,
+)
+from ._databackend import polars as pl, PdSeriesOrCat, PlSeries, PlFrame, PlExpr
 from typing import Callable
 
 
@@ -14,6 +22,30 @@ def _apply_grouped_expr(grouping: PlSeries, x, expr: PlExpr) -> PlFrame:
 @dispatch
 def inorder(fct: PlExpr, ordered: bool | None = None) -> PlExpr:
     return _expr_map_batches(fct, inorder, ordered=ordered)
+
+
+@dispatch
+def inorder(fct: PdSeriesOrCat, ordered: bool | None = None) -> PdSeriesOrCat:
+    import pandas as pd
+
+    if ordered is None:
+        ordered = is_ordered(fct)
+
+    if isinstance(fct, (pd.Series, pd.Categorical)):
+        uniq = fct.dropna().unique()
+
+        if isinstance(uniq, pd.Categorical):
+            # the result of .unique for a categorical is a new categorical
+            # unsurprisingly, it also sorts the categories, so reorder manually
+            # (note that this also applies to Series[Categorical].unique())
+            categories = uniq.categories[uniq.dropna().codes]
+            cat = pd.Categorical(fct, categories, ordered=ordered)
+        else:
+            cat = pd.Categorical(fct, uniq, ordered=ordered)
+
+        return pd.Series(cat) if isinstance(fct, pd.Series) else cat  # type: ignore
+
+    raise NotImplementedError()
 
 
 @dispatch
@@ -32,11 +64,39 @@ def inorder(fct: PlSeries, ordered: bool | None = None) -> PlSeries:
     --------
     fct.infreq : Order categories by value frequency count.
 
+    Examples
+    --------
+
+    >>> import pandas as pd
+    >>> import catfact as fct
+    >>> cat = pd.Categorical(["c", "a", "b"])
+    >>> cat
+    ['c', 'a', 'b']
+    Categories (3, object): ['a', 'b', 'c']
+
+    Note that above the categories are sorted alphabetically. Use `fct.inorder`
+    to keep the categories in first-observed order.
+
+    >>> fct.inorder(cat)
+    ['c', 'a', 'b']
+    Categories (3, object): ['c', 'a', 'b']
+
+    By default, the ordered setting of categoricals is respected. Use the ordered
+    parameter to override it.
+
+    >>> cat2 = pd.Categorical(["z", "a", "b"], ordered=True)
+    >>> fct.inorder(cat2)
+    ['z', 'a', 'b']
+    Categories (3, object): ['z' < 'a' < 'b']
+
+    >>> fct.inorder(cat2, ordered=False)
+    ['z', 'a', 'b']
+    Categories (3, object): ['z', 'a', 'b']
+
     """
-    # TODO: warn that polars has no ordered mode
 
     if ordered is not None:
-        raise NotImplementedError()
+        raise NotImplementedError("Polars does not support ordered categoricals.")
 
     if _is_enum_or_cat(fct):
         return factor(fct, levels=fct.unique(maintain_order=True))
@@ -47,6 +107,27 @@ def inorder(fct: PlSeries, ordered: bool | None = None) -> PlSeries:
 @dispatch
 def infreq(fct: PlExpr, ordered: bool | None = None) -> PlExpr:
     return _expr_map_batches(fct, infreq, ordered=ordered)
+
+
+@dispatch
+def infreq(fct: PdSeriesOrCat, ordered: bool | None = None) -> PdSeriesOrCat:
+    import pandas as pd
+
+    if ordered is None:
+        ordered = is_ordered(fct)
+
+    # Series sorts in descending frequency order
+    ser = pd.Series(fct)
+    freq = ser.value_counts()
+
+    # freq.index can be a CategoricalIndex, which would preserve
+    # the original category order, so we convert it to a list
+    cat = pd.Categorical(ser, categories=list(freq.index), ordered=ordered)
+
+    if isinstance(fct, pd.Series):
+        return pd.Series(cat)
+
+    return cat
 
 
 @dispatch
@@ -65,6 +146,14 @@ def infreq(fct: PlSeries, ordered: bool | None = None) -> PlSeries:
     --------
     fct.inorder : Order categories by when they're first observed.
 
+    Examples
+    --------
+    >>> import pandas as pd
+    >>> import catfact as fct
+    >>> fct.infreq(pd.Categorical(["c", "a", "c", "c", "a", "b"]))
+    ['c', 'a', 'c', 'c', 'a', 'b']
+    Categories (3, object): ['c', 'a', 'b']
+
     """
 
     _validate_type(fct)
@@ -72,11 +161,6 @@ def infreq(fct: PlSeries, ordered: bool | None = None) -> PlSeries:
     levels = fct.value_counts(sort=True).drop_nulls()[fct.name]
 
     return factor(fct, levels)
-
-
-@dispatch
-def inseq(fct: PlExpr) -> PlExpr:
-    return _expr_map_batches(fct, inseq)
 
 
 def _insert_index(lst: list, index, value) -> list:
@@ -98,6 +182,11 @@ def _insert_index(lst: list, index, value) -> list:
     res = lst[:]
     res[index:index] = value
     return res
+
+
+@dispatch
+def inseq(fct: PlExpr) -> PlExpr:
+    return _expr_map_batches(fct, inseq)
 
 
 @dispatch
@@ -165,6 +254,22 @@ def reorder(fct: PlExpr, x: PlExpr, func: PlExpr | None = None, desc: bool = Fal
 
 
 @dispatch
+def reorder(fct: PdSeriesOrCat, x, func="median", desc=False) -> PdSeriesOrCat:
+    # TODO: test this concrete implementation
+    import pandas as pd
+
+    x_vals = x.values if isinstance(x, pd.Series) else x
+    s = pd.Series(x_vals, index=fct)
+
+    # sort groups by calculated agg func. note that groupby uses dropna=True by default,
+    # but that's okay, since pandas categoricals can't order the NA category
+    ordered = s.groupby(level=0).agg(func).sort_values(ascending=not desc)
+
+    out = pd.Categorical(fct, categories=ordered.index)
+    return fct.__class__(out)
+
+
+@dispatch
 def reorder(fct: PlSeries, x: PlSeries, func: PlExpr | None = None, desc: bool = False) -> PlSeries:
     """Return copy of fct, with categories reordered according to values in x.
 
@@ -178,6 +283,28 @@ def reorder(fct: PlSeries, x: PlSeries, func: PlExpr | None = None, desc: bool =
         Function run over all values within a level of the categorical.
     desc :
         Whether to sort in descending order.
+
+    Examples
+    --------
+
+    >>> import polars as pl
+    >>> import catfact as fct
+    >>> ord1 = fct.reorder(pl.Series(['a', 'a', 'b']), pl.Series([4, 3, 2]))
+    >>> fct.cats(ord1).to_list()
+    ['b', 'a']
+
+
+    >>> ord2 = fct.reorder(pl.Series(['a', 'a', 'b']), pl.Series([4, 3, 2]), desc = True)
+    >>> fct.cats(ord2).to_list()
+    ['a', 'b']
+
+    >>> ord3 = fct.reorder(
+    ...     pl.Series(['x', 'x', 'y']),
+    ...     pl.Series([4, 0, 2]),
+    ...     pl.element().max()
+    ... )
+    >>> fct.cats(ord3).to_list()
+    ['y', 'x']
 
     """
 
@@ -200,6 +327,18 @@ def rev(fct: PlExpr) -> PlExpr:
 
 
 @dispatch
+def rev(fct: PdSeriesOrCat) -> PdSeriesOrCat:
+    import pandas as pd
+
+    cat = pd.Categorical(fct)
+
+    rev_levels = list(reversed(cat.categories))
+
+    out = fct.reorder_categories(rev_levels)
+    return pd.Series(out) if isinstance(fct, pd.Series) else out  # type: ignore
+
+
+@dispatch
 def rev(fct: PlSeries) -> PlSeries:
     """Reverse the order of a factor's levels.
 
@@ -207,6 +346,19 @@ def rev(fct: PlSeries) -> PlSeries:
     ----------
     fct :
         A Series
+
+    Examples
+    --------
+    >>> import pandas as pd
+    >>> import catfact as fct
+    >>> cat = pd.Categorical(["a", "b", "c"])
+    >>> cat
+    ['a', 'b', 'c']
+    Categories (3, object): ['a', 'b', 'c']
+
+    >>> fct.rev(cat)
+    ['a', 'b', 'c']
+    Categories (3, object): ['c', 'b', 'a']
 
     """
 
