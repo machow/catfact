@@ -5,11 +5,20 @@ from .misc import (
     _validate_type,
     _levels,
     _is_enum_or_cat,
+    cats,
     dispatch,
     factor,
     is_ordered,
 )
-from ._databackend import polars as pl, PdSeriesOrCat, PlSeries, PlFrame, PlExpr
+from ._databackend import (
+    polars as pl,
+    pandas as pd,
+    PdSeriesOrCat,
+    PdSeries,
+    PlSeries,
+    PlFrame,
+    PlExpr,
+)
 from typing import Callable
 
 
@@ -26,8 +35,6 @@ def inorder(fct: PlExpr, ordered: bool | None = None) -> PlExpr:
 
 @dispatch
 def inorder(fct: PdSeriesOrCat, ordered: bool | None = None) -> PdSeriesOrCat:
-    import pandas as pd
-
     if ordered is None:
         ordered = is_ordered(fct)
 
@@ -111,8 +118,6 @@ def infreq(fct: PlExpr, ordered: bool | None = None) -> PlExpr:
 
 @dispatch
 def infreq(fct: PdSeriesOrCat, ordered: bool | None = None) -> PdSeriesOrCat:
-    import pandas as pd
-
     if ordered is None:
         ordered = is_ordered(fct)
 
@@ -212,6 +217,28 @@ def relevel(
 
 @dispatch
 def relevel(
+    fct: PdSeriesOrCat,
+    *args,
+    func: Callable[[PdSeries], PdSeries] | None = None,
+    index: int | float = math.inf,
+) -> PdSeriesOrCat:
+    old_levels = cats(pd.Categorical(fct))
+    if func is not None:
+        if args:
+            raise ValueError("Cannot pass positional arguments when func is an expression.")
+        first_levels = func(pd.Series(old_levels))
+    else:
+        first_levels = pd.Series(args)
+
+    unmatched_levels = [lvl for lvl in old_levels if lvl not in set(first_levels)]
+    new_levels = _insert_index(unmatched_levels, index, list(first_levels))
+
+    res = pd.Categorical(fct, categories=new_levels)
+    return fct.__class__(res)
+
+
+@dispatch
+def relevel(
     fct: PlSeries,
     *args,
     func: Callable[[PlSeries], PlSeries] | None = None,
@@ -256,7 +283,6 @@ def reorder(fct: PlExpr, x: PlExpr, func: PlExpr | None = None, desc: bool = Fal
 @dispatch
 def reorder(fct: PdSeriesOrCat, x, func="median", desc=False) -> PdSeriesOrCat:
     # TODO: test this concrete implementation
-    import pandas as pd
 
     x_vals = x.values if isinstance(x, pd.Series) else x
     s = pd.Series(x_vals, index=fct)
@@ -328,8 +354,6 @@ def rev(fct: PlExpr) -> PlExpr:
 
 @dispatch
 def rev(fct: PdSeriesOrCat) -> PdSeriesOrCat:
-    import pandas as pd
-
     cat = pd.Categorical(fct)
 
     rev_levels = list(reversed(cat.categories))

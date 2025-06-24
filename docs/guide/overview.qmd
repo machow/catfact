@@ -31,7 +31,7 @@ pip install catfact
 ```{python}
 # import as fct for convenience ----
 import catfact as fct
-from catfact.data.polars import gdp, ratings, starwars
+from catfact.polars.data import gdp, ratings, starwars
 
 # catfact works well with Polars and Plotnine ----
 import polars as pl
@@ -108,7 +108,7 @@ Here it's used to cut down the number of eye colors to 8, lumping the rest into 
 (
     starwars
     .with_columns(
-       eye_color=fct.lump_n(pl.col("eye_color"), n=8)
+       eye_color=fct.lump_n(pl.col("eye_color"), n=6)
     )
     >> ggplot(aes("eye_color"))
     + geom_bar()

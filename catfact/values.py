@@ -1,5 +1,13 @@
 from .misc import dispatch, _expr_map_batches, _flip_mapping, _lvls_revalue
-from ._databackend import polars as pl, PdSeries, PdSeriesOrCat, PlExpr, PlSeries, PlFrame
+from ._databackend import (
+    polars as pl,
+    pandas as pd,
+    PdSeries,
+    PdSeriesOrCat,
+    PlExpr,
+    PlSeries,
+    PlFrame,
+)
 from typing import cast
 
 
@@ -12,8 +20,6 @@ def collapse(fct: PlExpr, other: str | None = None, /, **kwargs: str | list[str]
 def collapse(
     fct: PdSeriesOrCat, other: str | None = None, /, **kwargs: str | list[str]
 ) -> PdSeriesOrCat:
-    import pandas as pd
-
     recat = kwargs
     group_other = other
 
@@ -198,8 +204,6 @@ def lump_n(fct: PlExpr, n: int = 5, weights: PlExpr | None = None, other: str = 
 def lump_n(
     fct: PdSeriesOrCat, n: int = 5, weights: PdSeries | None = None, other: str = "Other"
 ) -> PdSeriesOrCat:
-    import pandas as pd
-
     ser = pd.Series(
         weights.array if weights is not None else 1,
         index=fct,
@@ -266,8 +270,6 @@ def lump_prop(fct: PlExpr, prop: float, weights=None, other="Other") -> PlExpr:
 def lump_prop(
     fct: PdSeriesOrCat, prop: float, weights: PdSeries | None = None, other: str = "Other"
 ) -> PdSeriesOrCat:
-    import pandas as pd
-
     ser = pd.Series(
         weights.array if weights is not None else 1,
         index=fct,
