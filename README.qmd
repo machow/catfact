@@ -1,0 +1,43 @@
+---
+title: catfact
+jupyter: python3
+---
+
+Categorical wrangling for Python. Supports both Polars and Pandas. Enables categorical and ordinal scales in plotting tools like Plotnine.
+
+catfact addresses some common challenges when working categorical data. Categorical data is useful when you want to display your data in a specific way, like alphabetical, most frequent first, or along a scale. It is a port of the popular R package forcats.
+
+## Installation
+
+```bash
+pip install catfact
+```
+
+## Basic example
+
+```{python}
+import polars as pl
+import catfact as fct
+from catfact.polars.data import starwars
+
+starwars.group_by("eye_color").count().sort("count", descending=True)
+```
+
+```{python}
+from plotnine import ggplot, aes, geom_bar, coord_flip
+
+(
+    ggplot(starwars, aes("eye_color"))
+    + geom_bar()
+    + coord_flip()
+)
+```
+
+```{python}
+(
+    starwars.with_columns(fct.infreq(pl.col("eye_color")))
+    >> ggplot(aes("eye_color"))
+    + geom_bar()
+    + coord_flip()
+)
+```
