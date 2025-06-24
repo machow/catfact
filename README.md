@@ -1,6 +1,8 @@
 # catfact
 
 
+    <function __main__.<lambda>(df)>
+
 Categorical wrangling for Python. Supports both Polars and Pandas.
 Enables categorical and ordinal scales in plotting tools like Plotnine.
 
@@ -33,20 +35,20 @@ from catfact.polars.data import starwars
 <div>
 <small>shape: (15, 2)</small>
 
-| eye_color   | len |
-|-------------|-----|
-| str         | u32 |
-| "brown"     | 21  |
-| "blue"      | 19  |
-| "yellow"    | 11  |
-| "black"     | 10  |
-| "orange"    | 8   |
-| …           | …   |
-| "gold"      | 1   |
-| "pink"      | 1   |
-| "dark"      | 1   |
-| "blue-gray" | 1   |
-| "white"     | 1   |
+| eye_color       | len |
+|-----------------|-----|
+| str             | u32 |
+| "brown"         | 21  |
+| "blue"          | 19  |
+| "yellow"        | 11  |
+| "black"         | 10  |
+| "orange"        | 8   |
+| …               | …   |
+| "green, yellow" | 1   |
+| "pink"          | 1   |
+| "red, blue"     | 1   |
+| "white"         | 1   |
+| "blue-gray"     | 1   |
 
 </div>
 
@@ -65,7 +67,10 @@ width="640" height="480" />
 
 ``` python
 (
-    starwars.with_columns(fct.infreq(pl.col("eye_color")))
+    starwars
+    .with_columns(
+        fct.infreq(pl.col("eye_color"))
+    )
     >> ggplot(aes("eye_color"))
     + geom_bar()
     + coord_flip()
