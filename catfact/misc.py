@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 
-from ._databackend import polars as pl, PdSeriesOrCat, PlSeries, PlExpr
+from ._databackend import polars as pl, pandas as pd, PdSeriesOrCat, PlSeries, PlExpr
 from ddispatch import dispatch
 from typing import Any, Callable, ParamSpec, Concatenate
 
@@ -103,6 +103,20 @@ def to_list(x: PlSeries) -> list[Any]:
 
 
 @dispatch
+def cats(x: PdSeriesOrCat) -> "pd.Index":
+    if isinstance(x, pd.Categorical):
+        return x.categories
+
+    return x.cat.categories
+
+
+@dispatch
+def cats(x: PlExpr) -> PlExpr:
+    """Return the levels of a categorical series as an expression."""
+    return _expr_map_batches(x, cats)
+
+
+@dispatch
 def cats(x: PlSeries) -> PlSeries:
     """Return the levels of a categorical series.
 
@@ -121,6 +135,15 @@ def cats(x: PlSeries) -> PlSeries:
 
 
 #
+
+
+@dispatch
+def factor(
+    x: PdSeriesOrCat, levels: "pd.Index | list[str] | None" = None, ordered: bool | None = None
+) -> PdSeriesOrCat:
+    if levels is None:
+        levels = x.unique()
+    return pd.Categorical(x, categories=levels, ordered=ordered)
 
 
 @dispatch

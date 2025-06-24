@@ -5,11 +5,20 @@ from .misc import (
     _validate_type,
     _levels,
     _is_enum_or_cat,
+    cats,
     dispatch,
     factor,
     is_ordered,
 )
-from ._databackend import polars as pl, pandas as pd, PdSeriesOrCat, PlSeries, PlFrame, PlExpr
+from ._databackend import (
+    polars as pl,
+    pandas as pd,
+    PdSeriesOrCat,
+    PdSeries,
+    PlSeries,
+    PlFrame,
+    PlExpr,
+)
 from typing import Callable
 
 
@@ -204,6 +213,28 @@ def relevel(
     index: int | float = math.inf,
 ) -> PlExpr:
     return _expr_map_batches(fct, relevel, *args, func=func, index=index)
+
+
+@dispatch
+def relevel(
+    fct: PdSeriesOrCat,
+    *args,
+    func: Callable[[PdSeries], PdSeries] | None = None,
+    index: int | float = math.inf,
+) -> PdSeriesOrCat:
+    old_levels = cats(pd.Categorical(fct))
+    if func is not None:
+        if args:
+            raise ValueError("Cannot pass positional arguments when func is an expression.")
+        first_levels = func(pd.Series(old_levels))
+    else:
+        first_levels = pd.Series(args)
+
+    unmatched_levels = [lvl for lvl in old_levels if lvl not in set(first_levels)]
+    new_levels = _insert_index(unmatched_levels, index, list(first_levels))
+
+    res = pd.Categorical(fct, categories=new_levels)
+    return fct.__class__(res)
 
 
 @dispatch

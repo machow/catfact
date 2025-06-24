@@ -13,9 +13,10 @@ def feed(func):
     return wrapper
 
 
+@pl.api.register_expr_namespace("fct")
 @pl.api.register_series_namespace("fct")
 class CatfactNamespace:
-    def __init__(self, s: pl.Series) -> None:
+    def __init__(self, s: pl.Series | pl.Expr):
         self._s = s
 
     cats = feed(fct.cats)
