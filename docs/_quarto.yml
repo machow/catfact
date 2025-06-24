@@ -17,6 +17,9 @@ website:
         href: guide/overview.qmd
       - text: Reference
         href: reference/index.qmd
+    right:
+      - icon: github
+        href: https://github.com/machow/catfact
   sidebar:
     - id: Get Started
       title: Get Started
