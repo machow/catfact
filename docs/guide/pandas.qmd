@@ -36,7 +36,7 @@ ratings2 = ratings.assign(
 ```
 
 ```{python}
-# | layout-ncol: 2
+# | layout-nrow: 1
 from plotnine import ggplot, aes, geom_bar
 
 ggplot(ratings2, aes("rating_lvl", fill="rating_lvl")) + geom_bar()
