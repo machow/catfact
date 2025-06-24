@@ -1,0 +1,674 @@
+[
+  {
+    "objectID": "reference/collapse.html",
+    "href": "reference/collapse.html",
+    "title": "collapse",
+    "section": "",
+    "text": "collapse(fct, other=None, /, **kwargs)\nReturn copy of fct with categories renamed. Optionally group all others.\n\n\n\nfct : PlSeries\n\nA Series\n\nother : str | None = None\n\nAn optional string, specifying what all other categories should be named. This will always be the last category level in the result.\n\n****kwargs** : str | list[str] = {}\n\nKeyword arguments of form new_cat_name = old_cat_name. old_cat_name may be a list of existing categories, to be given the same name.\n\n\n\n\n\nResulting categories are ordered according to the earliest level replaced. If we rename the first and last levels to “c”, then “c” is the first level.\n\n\n\n&gt;&gt;&gt; import pandas as pd\n&gt;&gt;&gt; import catfact as fct\n&gt;&gt;&gt; cat = pd.Categorical(['a', 'b', 'c'])\n&gt;&gt;&gt; fct.collapse(cat, x = 'a')\n['x', 'b', 'c']\nCategories (3, object): ['x', 'b', 'c']\n&gt;&gt;&gt; fct.collapse(cat, \"others\", x = \"a\")\n['x', 'others', 'others']\nCategories (2, object): ['x', 'others']\n&gt;&gt;&gt; fct.collapse(cat, ab = [\"a\", \"b\"])\n['ab', 'ab', 'c']\nCategories (2, object): ['ab', 'c']",
+    "crumbs": [
+      "Reference",
+      "Level values",
+      "collapse"
+    ]
+  },
+  {
+    "objectID": "reference/collapse.html#parameters",
+    "href": "reference/collapse.html#parameters",
+    "title": "collapse",
+    "section": "",
+    "text": "fct : PlSeries\n\nA Series\n\nother : str | None = None\n\nAn optional string, specifying what all other categories should be named. This will always be the last category level in the result.\n\n****kwargs** : str | list[str] = {}\n\nKeyword arguments of form new_cat_name = old_cat_name. old_cat_name may be a list of existing categories, to be given the same name.",
+    "crumbs": [
+      "Reference",
+      "Level values",
+      "collapse"
+    ]
+  },
+  {
+    "objectID": "reference/collapse.html#notes",
+    "href": "reference/collapse.html#notes",
+    "title": "collapse",
+    "section": "",
+    "text": "Resulting categories are ordered according to the earliest level replaced. If we rename the first and last levels to “c”, then “c” is the first level.",
+    "crumbs": [
+      "Reference",
+      "Level values",
+      "collapse"
+    ]
+  },
+  {
+    "objectID": "reference/collapse.html#examples",
+    "href": "reference/collapse.html#examples",
+    "title": "collapse",
+    "section": "",
+    "text": "&gt;&gt;&gt; import pandas as pd\n&gt;&gt;&gt; import catfact as fct\n&gt;&gt;&gt; cat = pd.Categorical(['a', 'b', 'c'])\n&gt;&gt;&gt; fct.collapse(cat, x = 'a')\n['x', 'b', 'c']\nCategories (3, object): ['x', 'b', 'c']\n&gt;&gt;&gt; fct.collapse(cat, \"others\", x = \"a\")\n['x', 'others', 'others']\nCategories (2, object): ['x', 'others']\n&gt;&gt;&gt; fct.collapse(cat, ab = [\"a\", \"b\"])\n['ab', 'ab', 'c']\nCategories (2, object): ['ab', 'c']",
+    "crumbs": [
+      "Reference",
+      "Level values",
+      "collapse"
+    ]
+  },
+  {
+    "objectID": "reference/reorder.html",
+    "href": "reference/reorder.html",
+    "title": "reorder",
+    "section": "",
+    "text": "reorder(fct, x, func=None, desc=False)\nReturn copy of fct, with categories reordered according to values in x.\n\n\n\nfct : PlSeries\n\nA Series, which may be a string or factor-like.\n\nx : PlSeries\n\nValues used to reorder categorical. Must be same length as fct.\n\nfunc : PlExpr | None = None\n\nFunction run over all values within a level of the categorical.\n\ndesc : bool = False\n\nWhether to sort in descending order.\n\n\n\n\n\n&gt;&gt;&gt; import polars as pl\n&gt;&gt;&gt; import catfact as fct\n&gt;&gt;&gt; ord1 = fct.reorder(pl.Series(['a', 'a', 'b']), pl.Series([4, 3, 2]))\n&gt;&gt;&gt; fct.cats(ord1).to_list()\n['b', 'a']\n&gt;&gt;&gt; ord2 = fct.reorder(pl.Series(['a', 'a', 'b']), pl.Series([4, 3, 2]), desc = True)\n&gt;&gt;&gt; fct.cats(ord2).to_list()\n['a', 'b']\n&gt;&gt;&gt; ord3 = fct.reorder(\n...     pl.Series(['x', 'x', 'y']),\n...     pl.Series([4, 0, 2]),\n...     pl.element().max()\n... )\n&gt;&gt;&gt; fct.cats(ord3).to_list()\n['y', 'x']",
+    "crumbs": [
+      "Reference",
+      "Level order",
+      "reorder"
+    ]
+  },
+  {
+    "objectID": "reference/reorder.html#parameters",
+    "href": "reference/reorder.html#parameters",
+    "title": "reorder",
+    "section": "",
+    "text": "fct : PlSeries\n\nA Series, which may be a string or factor-like.\n\nx : PlSeries\n\nValues used to reorder categorical. Must be same length as fct.\n\nfunc : PlExpr | None = None\n\nFunction run over all values within a level of the categorical.\n\ndesc : bool = False\n\nWhether to sort in descending order.",
+    "crumbs": [
+      "Reference",
+      "Level order",
+      "reorder"
+    ]
+  },
+  {
+    "objectID": "reference/reorder.html#examples",
+    "href": "reference/reorder.html#examples",
+    "title": "reorder",
+    "section": "",
+    "text": "&gt;&gt;&gt; import polars as pl\n&gt;&gt;&gt; import catfact as fct\n&gt;&gt;&gt; ord1 = fct.reorder(pl.Series(['a', 'a', 'b']), pl.Series([4, 3, 2]))\n&gt;&gt;&gt; fct.cats(ord1).to_list()\n['b', 'a']\n&gt;&gt;&gt; ord2 = fct.reorder(pl.Series(['a', 'a', 'b']), pl.Series([4, 3, 2]), desc = True)\n&gt;&gt;&gt; fct.cats(ord2).to_list()\n['a', 'b']\n&gt;&gt;&gt; ord3 = fct.reorder(\n...     pl.Series(['x', 'x', 'y']),\n...     pl.Series([4, 0, 2]),\n...     pl.element().max()\n... )\n&gt;&gt;&gt; fct.cats(ord3).to_list()\n['y', 'x']",
+    "crumbs": [
+      "Reference",
+      "Level order",
+      "reorder"
+    ]
+  },
+  {
+    "objectID": "reference/recode.html",
+    "href": "reference/recode.html",
+    "title": "recode",
+    "section": "",
+    "text": "recode(fct, **kwargs)\nReturn copy of fct with renamed categories.\n\n\n\nfct : PlSeries\n\nA Series\n\n****kwargs** :  = {}\n\nArguments of form new_name = old_name.\n\n\n\n\n\nfct.collapse: similar function, but allows grouping all remaining categories.\n\n\n\n&gt;&gt;&gt; import pandas as pd\n&gt;&gt;&gt; import catfact as fct\n&gt;&gt;&gt; cat = pd.Categorical(['a', 'b', 'c'])\n&gt;&gt;&gt; fct.recode(cat, z = 'c')\n['a', 'b', 'z']\nCategories (3, object): ['a', 'b', 'z']\n&gt;&gt;&gt; fct.recode(cat, x = ['a', 'b'])\n['x', 'x', 'c']\nCategories (2, object): ['x', 'c']\n&gt;&gt;&gt; funky_cat = pd.Categorical([\"..x\", \"some y\"])\n&gt;&gt;&gt; fct.recode(funky_cat, **{\"x\": \"..x\", \"y\": \"some y\"})\n['x', 'y']\nCategories (2, object): ['x', 'y']",
+    "crumbs": [
+      "Reference",
+      "Level values",
+      "recode"
+    ]
+  },
+  {
+    "objectID": "reference/recode.html#parameters",
+    "href": "reference/recode.html#parameters",
+    "title": "recode",
+    "section": "",
+    "text": "fct : PlSeries\n\nA Series\n\n****kwargs** :  = {}\n\nArguments of form new_name = old_name.",
+    "crumbs": [
+      "Reference",
+      "Level values",
+      "recode"
+    ]
+  },
+  {
+    "objectID": "reference/recode.html#see-also",
+    "href": "reference/recode.html#see-also",
+    "title": "recode",
+    "section": "",
+    "text": "fct.collapse: similar function, but allows grouping all remaining categories.",
+    "crumbs": [
+      "Reference",
+      "Level values",
+      "recode"
+    ]
+  },
+  {
+    "objectID": "reference/recode.html#examples",
+    "href": "reference/recode.html#examples",
+    "title": "recode",
+    "section": "",
+    "text": "&gt;&gt;&gt; import pandas as pd\n&gt;&gt;&gt; import catfact as fct\n&gt;&gt;&gt; cat = pd.Categorical(['a', 'b', 'c'])\n&gt;&gt;&gt; fct.recode(cat, z = 'c')\n['a', 'b', 'z']\nCategories (3, object): ['a', 'b', 'z']\n&gt;&gt;&gt; fct.recode(cat, x = ['a', 'b'])\n['x', 'x', 'c']\nCategories (2, object): ['x', 'c']\n&gt;&gt;&gt; funky_cat = pd.Categorical([\"..x\", \"some y\"])\n&gt;&gt;&gt; fct.recode(funky_cat, **{\"x\": \"..x\", \"y\": \"some y\"})\n['x', 'y']\nCategories (2, object): ['x', 'y']",
+    "crumbs": [
+      "Reference",
+      "Level values",
+      "recode"
+    ]
+  },
+  {
+    "objectID": "reference/data.ratings_messy.html",
+    "href": "reference/data.ratings_messy.html",
+    "title": "data.ratings_messy",
+    "section": "",
+    "text": "data.ratings_messy\ndata.ratings_messy\nMessy ratings data.\nThis data has the following columns:\n\nrating: one of very bad, bad, neutral, good, very good.\n\nMoreover, some of the neutral ratings were miscoded as NEUTRAL.",
+    "crumbs": [
+      "Reference",
+      "Datasets",
+      "data.ratings_messy"
+    ]
+  },
+  {
+    "objectID": "reference/lump_prop.html",
+    "href": "reference/lump_prop.html",
+    "title": "lump_prop",
+    "section": "",
+    "text": "lump_prop\nlump_prop(fct, prop, weights=None, other='Other')\nLump levels that appear in fewer than some proportion in the series.",
+    "crumbs": [
+      "Reference",
+      "Level values",
+      "lump_prop"
+    ]
+  },
+  {
+    "objectID": "reference/cats.html",
+    "href": "reference/cats.html",
+    "title": "cats",
+    "section": "",
+    "text": "cats(x)\nReturn the levels of a categorical series.\n\n\n\nx : PlSeries\n\nA pandas Series, Categorical, or list-like object\n\n\n\n\n\n\n : list\n\nThe levels of the categorical series.",
+    "crumbs": [
+      "Reference",
+      "Other helpers",
+      "cats"
+    ]
+  },
+  {
+    "objectID": "reference/cats.html#parameters",
+    "href": "reference/cats.html#parameters",
+    "title": "cats",
+    "section": "",
+    "text": "x : PlSeries\n\nA pandas Series, Categorical, or list-like object",
+    "crumbs": [
+      "Reference",
+      "Other helpers",
+      "cats"
+    ]
+  },
+  {
+    "objectID": "reference/cats.html#returns",
+    "href": "reference/cats.html#returns",
+    "title": "cats",
+    "section": "",
+    "text": ": list\n\nThe levels of the categorical series.",
+    "crumbs": [
+      "Reference",
+      "Other helpers",
+      "cats"
+    ]
+  },
+  {
+    "objectID": "reference/data.starwars.html",
+    "href": "reference/data.starwars.html",
+    "title": "data.starwars",
+    "section": "",
+    "text": "data.starwars\ndata.starwars\nStar Wars character data.\nThis data has the following columns:\n\nname: The name of the character\neye_color: The eye color of the character\nspecies: The species of the character\n\nIt comes from the dplyr library (https://dplyr.tidyverse.org/), which fetched the original data from the Star Wars API (https://swapi.py4e.com/).",
+    "crumbs": [
+      "Reference",
+      "Datasets",
+      "data.starwars"
+    ]
+  },
+  {
+    "objectID": "reference/factor.html",
+    "href": "reference/factor.html",
+    "title": "factor",
+    "section": "",
+    "text": "factor\nfactor(x, levels=None)\nCreate a factor, a categorical series whose level order can be specified.",
+    "crumbs": [
+      "Reference",
+      "Other helpers",
+      "factor"
+    ]
+  },
+  {
+    "objectID": "reference/inseq.html",
+    "href": "reference/inseq.html",
+    "title": "inseq",
+    "section": "",
+    "text": "inseq\ninseq(fct)\nReturn a factor with categories ordered lexically (alphabetically).",
+    "crumbs": [
+      "Reference",
+      "Level order",
+      "inseq"
+    ]
+  },
+  {
+    "objectID": "reference/data.gdp.html",
+    "href": "reference/data.gdp.html",
+    "title": "data.gdp",
+    "section": "",
+    "text": "data.gdp\ndata.gdp\nGross Domestic Product (GDP) by country.\nThis data has the following columns:\n\nyear: The year of the GDP data.\ncountry: The country for which the GDP is reported.\ngdp: The GDP value in current US dollars.\n\nIt was obtained from the World Bank and is available at https://data.worldbank.org/indicator/NY.GDP.MKTP.CD.",
+    "crumbs": [
+      "Reference",
+      "Datasets",
+      "data.gdp"
+    ]
+  },
+  {
+    "objectID": "guide/pandas.html",
+    "href": "guide/pandas.html",
+    "title": "Pandas",
+    "section": "",
+    "text": "import catfact as fct  # for functions\nimport catfact.pandas  # for .fct methods\n\nfrom catfact.pandas.data import starwars\n# approach 1: functions\nfct.cats(fct.infreq(starwars[\"eye_color\"]))\n\n# approach 2: .fct namespace methods\nstarwars[\"eye_color\"].fct.infreq().fct.cats()\n\nIndex(['brown', 'blue', 'yellow', 'black', 'orange', 'red', 'hazel', 'unknown',\n       'blue-gray', 'pink', 'red, blue', 'gold', 'green, yellow', 'white',\n       'dark'],\n      dtype='object')",
+    "crumbs": [
+      "Get Started",
+      "Frame libraries",
+      "Pandas"
+    ]
+  },
+  {
+    "objectID": "guide/pandas.html#ordered-flag",
+    "href": "guide/pandas.html#ordered-flag",
+    "title": "Pandas",
+    "section": "Ordered flag",
+    "text": "Ordered flag\n\nfrom catfact.pandas.data import ratings\n\nLEVELS = [\"very-bad\", \"bad\", \"neutral\", \"good\", \"very-good\"]\n\n\nratings2 = ratings.assign(\n    rating_lvl=lambda d: d[\"rating\"].fct.relevel(*LEVELS),\n    rating_ord=lambda d: d[\"rating_lvl\"].fct.factor(ordered=True)\n)\n\nfrom plotnine import ggplot, aes, geom_bar\n\nggplot(ratings2, aes(\"rating_lvl\", fill=\"rating_lvl\")) + geom_bar()\nggplot(ratings2, aes(\"rating_ord\", fill=\"rating_ord\")) + geom_bar()",
+    "crumbs": [
+      "Get Started",
+      "Frame libraries",
+      "Pandas"
+    ]
+  },
+  {
+    "objectID": "guide/overview.html",
+    "href": "guide/overview.html",
+    "title": "Overview",
+    "section": "",
+    "text": "catfact is a library for working with categorical data in Python DataFrames. It address some common challenges when working with them. Categorical data is useful when you want to display your data in a specific way, like alphabetical, most frequent first, or along a scale.\ncatfact currently works with Polars, but will support Pandas in the future.\nThis overview will show you how to install and use catfact, focused on four of its most handy functions:",
+    "crumbs": [
+      "Get Started",
+      "Overview"
+    ]
+  },
+  {
+    "objectID": "guide/overview.html#install",
+    "href": "guide/overview.html#install",
+    "title": "Overview",
+    "section": "Install",
+    "text": "Install\npip install catfact",
+    "crumbs": [
+      "Get Started",
+      "Overview"
+    ]
+  },
+  {
+    "objectID": "guide/overview.html#import-and-basic-use",
+    "href": "guide/overview.html#import-and-basic-use",
+    "title": "Overview",
+    "section": "Import and basic use",
+    "text": "Import and basic use\n\n# import as fct for convenience ----\nimport catfact as fct\nfrom catfact.polars.data import gdp, ratings, starwars\n\n# catfact works well with Polars and Plotnine ----\nimport polars as pl\nfrom plotnine import ggplot, aes, geom_bar, geom_line, labs, coord_flip\n\nSuppose you have a Polars Categorical Series. You can get the category levels with .cat.get_categories().\n\ncounts = pl.Series([\"z\", \"z\", \"a\", \"b\"], dtype=pl.Categorical)\ncounts.cat.get_categories().to_list()\n\n['z', 'a', 'b']\n\n\nNotice that the categories are ordered by when they first appear. Since \"z\" is the first element of the Series, it’s also the first category.\ncatfact provides functions like fct.inseq(), which orders categories alphabetically, and fct.cats() as a shorthand for .cat.get_categories().\n\ncount_seq = fct.inseq(counts)\nfct.cats(count_seq).to_list()\n\n['a', 'b', 'z']\n\n\n\n\n\n\n\n\nUsing the Polars fct namespace\n\n\n\ncatfact provides a .fct namespace for working with Polars Series.\n\nimport catfact.polars\n\ncounts.fct.inseq().fct.cats().to_list()\n\n['a', 'b', 'z']\n\n\n\n\nIn the following sections, we’ll look at examples of four of the most useful functions in catfact: fct.infreq(), fct.lump_n(), fct.reorder(), and fct.relevel().",
+    "crumbs": [
+      "Get Started",
+      "Overview"
+    ]
+  },
+  {
+    "objectID": "guide/overview.html#fct.infreq",
+    "href": "guide/overview.html#fct.infreq",
+    "title": "Overview",
+    "section": "fct.infreq",
+    "text": "fct.infreq\nfct.infreq() reorders categories by frequency. This is useful combined with Plotnine, to order bars in a bar chart.\nFor example, the plot below counts starwars character by eye color, but the bars are ordered alphabetically by default.\n\n(\n    starwars\n    &gt;&gt; ggplot(aes(\"eye_color\"))\n    + geom_bar()\n    + coord_flip()\n)\n\n\n\n\n\n\n\n\nThe code below uses fct.infreq() with the Polars pl.DataFrame.with_columns method to order the eye_color column’s categories by frequency. Plotnine knows to use the categories to order the bars.\n\n(\n    starwars\n    .with_columns(\n        eye_color=fct.infreq(pl.col(\"eye_color\"))\n    )\n    &gt;&gt; ggplot(aes(\"eye_color\"))\n    + geom_bar()\n    + coord_flip()\n)",
+    "crumbs": [
+      "Get Started",
+      "Overview"
+    ]
+  },
+  {
+    "objectID": "guide/overview.html#fct.lump_n",
+    "href": "guide/overview.html#fct.lump_n",
+    "title": "Overview",
+    "section": "fct.lump_n",
+    "text": "fct.lump_n\nfct.lump_n() combines infrequent categories into a single category, called “Other” by default. This is useful for cutting down the number of bars in a plot.\nHere it’s used to cut down the number of eye colors to 8, lumping the rest into “Other”.\n\n(\n    starwars\n    .with_columns(\n       eye_color=fct.lump_n(pl.col(\"eye_color\"), n=6)\n    )\n    &gt;&gt; ggplot(aes(\"eye_color\"))\n    + geom_bar()\n)",
+    "crumbs": [
+      "Get Started",
+      "Overview"
+    ]
+  },
+  {
+    "objectID": "guide/overview.html#fct.reorder",
+    "href": "guide/overview.html#fct.reorder",
+    "title": "Overview",
+    "section": "fct.reorder",
+    "text": "fct.reorder\nfct.reorder() reorders categories based on a calculation on another column.\nFor example, the line chart below shows GDP over time for several countries. The countries are ordered alphabetically in the legend, but this means they don’t match up to the end of the lines well.\n\nNotice that China is the top entry, but ends as the second highest line. The United States is the last entry, but ends as the highest line. The black lines show how far apart the legend entries are from their lines.\nThe code below fixes the legend. It uses fct.reorder() to reorder the country column by calculating pl.element().max() on the gdp column.\n\n(\n    gdp\n    .with_columns(\n        country=fct.reorder(\n            pl.col(\"country\"),\n            pl.col(\"gdp\"),  # used for reordering\n            pl.element().max(),  # calculation\n            desc=True,\n        )\n    )\n    &gt;&gt; ggplot(aes(\"year\", \"gdp\", color=\"country\"))\n    + geom_line()\n    + labs(y=\"gdp (USD, in trillions)\")\n)",
+    "crumbs": [
+      "Get Started",
+      "Overview"
+    ]
+  },
+  {
+    "objectID": "guide/overview.html#fct.relevel",
+    "href": "guide/overview.html#fct.relevel",
+    "title": "Overview",
+    "section": "fct.relevel",
+    "text": "fct.relevel\nfct.relevel() reorders categories based on a manual order. This is useful when you want to display categories in a specific order, like a scale from “very-bad” to “very-good”.\nThe code below counts ratings data provided by catfact. However, the order of the counts don’t match the order you’d expect from a ratings scale.\n\n(\n  ratings\n  .group_by(\"rating\")\n  .agg(pl.len())\n)\n\n\nshape: (5, 2)ratinglenstru32\"very-bad\"1\"bad\"1\"very-good\"2\"good\"3\"neutral\"4\n\n\nNotice that “neutral” is first, but often you want to start with “very-bad” and end with “very-good”. By passing in a new order to fct.relevel(), you can manually set the correct order of categories.\n\nnew_order = [\"very-bad\", \"bad\", \"neutral\", \"good\", \"very-good\"]\n\nfixed_counts = (\n    ratings.with_columns(\n        # set new level order for rating\n        rating=fct.relevel(pl.col(\"rating\"), *new_order)\n    )\n    .group_by(\"rating\")\n    .agg(pl.len())\n    .sort(\"rating\")\n)\n\nfixed_counts\n\n\nshape: (5, 2)ratinglenenumu32\"very-bad\"1\"bad\"1\"neutral\"4\"good\"3\"very-good\"2\n\n\nA key here is that Polars uses the category levels when doing .sort(\"rating\"). Here are the categories listed.\n\nfct.cats(fixed_counts[\"rating\"]).to_list()\n\n['very-bad', 'bad', 'neutral', 'good', 'very-good']",
+    "crumbs": [
+      "Get Started",
+      "Overview"
+    ]
+  },
+  {
+    "objectID": "guide/fct-namespace.html",
+    "href": "guide/fct-namespace.html",
+    "title": ".fct namespace",
+    "section": "",
+    "text": "Both Polars and Pandas support method chaining, using a custom .fct namespace. In order to use the namespace, you need to import catfact.polars or catfact.pandas, respectively.\n\n# required for using .fct namespace\nimport catfact.polars\n\nHere’s an example of .fct namespace methods in action:\n\nimport polars as pl\n\nser = pl.Series([\"a\", \"a\", \"b\", \"c\"])\n\n# reverse category order\nser.fct.rev().fct.cats()\n\n\nshape: (3,)\n\n\n\n\n\n\nstr\n\n\n\n\n\"c\"\n\n\n\"b\"\n\n\n\"a\"",
+    "crumbs": [
+      "Get Started",
+      "Frame libraries",
+      "`.fct` namespace"
+    ]
+  },
+  {
+    "objectID": "guide/polars.html",
+    "href": "guide/polars.html",
+    "title": "Polars",
+    "section": "",
+    "text": "import polars as pl\n\nimport catfact as fct  # for functions\nimport catfact.polars  # for .fct methods\n\nfrom catfact.polars.data import starwars, gdp\n# approach 1: functions\nfct.cats(fct.infreq(starwars[\"eye_color\"]))\n\n# approach 2: .fct namespace methods\nstarwars[\"eye_color\"].fct.infreq().fct.cats()\n\n\nshape: (15,)\n\n\n\neye_color\n\n\nstr\n\n\n\n\n\"brown\"\n\n\n\"blue\"\n\n\n\"yellow\"\n\n\n\"black\"\n\n\n\"orange\"\n\n\n…\n\n\n\"red, blue\"\n\n\n\"gold\"\n\n\n\"green, yellow\"\n\n\n\"white\"\n\n\n\"dark\"",
+    "crumbs": [
+      "Get Started",
+      "Frame libraries",
+      "Polars"
+    ]
+  },
+  {
+    "objectID": "guide/polars.html#lazy-expressions",
+    "href": "guide/polars.html#lazy-expressions",
+    "title": "Polars",
+    "section": "Lazy expressions",
+    "text": "Lazy expressions\n\nstarwars.select(pl.col(\"eye_color\").fct.infreq().fct.cats())\n\n\nshape: (15, 1)\n\n\n\neye_color\n\n\nstr\n\n\n\n\n\"brown\"\n\n\n\"blue\"\n\n\n\"yellow\"\n\n\n\"black\"\n\n\n\"orange\"\n\n\n…\n\n\n\"red, blue\"\n\n\n\"gold\"\n\n\n\"green, yellow\"\n\n\n\"white\"\n\n\n\"dark\"",
+    "crumbs": [
+      "Get Started",
+      "Frame libraries",
+      "Polars"
+    ]
+  },
+  {
+    "objectID": "guide/polars.html#computation-expressions",
+    "href": "guide/polars.html#computation-expressions",
+    "title": "Polars",
+    "section": "Computation expressions",
+    "text": "Computation expressions\n\ngdp[\"country\"].fct.reorder(gdp[\"gdp\"], pl.element().max()).fct.cats()\n\n\nshape: (5,)\n\n\n\ncountry\n\n\nstr\n\n\n\n\n\"India\"\n\n\n\"Germany\"\n\n\n\"Japan\"\n\n\n\"China\"\n\n\n\"United States\"\n\n\n\n\n\n\nOne big advantage of using the functions directly is that they can be partialed:\n\nfrom functools import partial\n\nf_lump_3 = partial(fct.lump_n, n=3)\n\n(\n    starwars\n    .select(f_lump_3(pl.col(\"eye_color\")))\n    .group_by(\"eye_color\")\n    .agg(pl.len())\n    .sort(\"eye_color\")\n)\n\n\nshape: (4, 2)\n\n\n\neye_color\nlen\n\n\nenum\nu32\n\n\n\n\n\"brown\"\n21\n\n\n\"blue\"\n19\n\n\n\"yellow\"\n11\n\n\n\"Other\"\n36",
+    "crumbs": [
+      "Get Started",
+      "Frame libraries",
+      "Polars"
+    ]
+  },
+  {
+    "objectID": "guide/polars.html#limitations",
+    "href": "guide/polars.html#limitations",
+    "title": "Polars",
+    "section": "Limitations",
+    "text": "Limitations\nCurrently, Polars does not support the use of an .ordered flag on its Enums and Categoricals. In tools like Pandas (and factors in the R programming language), this flag is used to indicate ordinal scales (e.g. “low”, “medium”, “high”, vs. “red”, “green”, “blue”).\nWithout this flag, plotting tools like Plotnine can’t automatically provide pieces like sequential color palettes for ordinal scales (see this Polars issue).\nSee this Pandas ordered example for a plot that uses the .ordered flag.",
+    "crumbs": [
+      "Get Started",
+      "Frame libraries",
+      "Polars"
+    ]
+  },
+  {
+    "objectID": "reference/data.ratings.html",
+    "href": "reference/data.ratings.html",
+    "title": "data.ratings",
+    "section": "",
+    "text": "data.ratings\ndata.ratings\nCleaned up ratings data.\nThis data is the ratings_messy data with the bad NEUTRAL values converted to neutral.",
+    "crumbs": [
+      "Reference",
+      "Datasets",
+      "data.ratings"
+    ]
+  },
+  {
+    "objectID": "reference/lump_n.html",
+    "href": "reference/lump_n.html",
+    "title": "lump_n",
+    "section": "",
+    "text": "lump_n(fct, n=5, weights=None, other='Other')\nLump all levels except the n most frequent.\n\n\n\nfct : PlSeries\n\nA Series\n\nn : int = 5\n\nNumber of categories to lump together.\n\nweights : PlSeries | None = None\n\nWeights.\n\nother : str = 'Other'\n\nName of the new category.\n\n\n\n\n\n\n : Series\n\nA new series with the most common n categories lumped together.",
+    "crumbs": [
+      "Reference",
+      "Level values",
+      "lump_n"
+    ]
+  },
+  {
+    "objectID": "reference/lump_n.html#parameters",
+    "href": "reference/lump_n.html#parameters",
+    "title": "lump_n",
+    "section": "",
+    "text": "fct : PlSeries\n\nA Series\n\nn : int = 5\n\nNumber of categories to lump together.\n\nweights : PlSeries | None = None\n\nWeights.\n\nother : str = 'Other'\n\nName of the new category.",
+    "crumbs": [
+      "Reference",
+      "Level values",
+      "lump_n"
+    ]
+  },
+  {
+    "objectID": "reference/lump_n.html#returns",
+    "href": "reference/lump_n.html#returns",
+    "title": "lump_n",
+    "section": "",
+    "text": ": Series\n\nA new series with the most common n categories lumped together.",
+    "crumbs": [
+      "Reference",
+      "Level values",
+      "lump_n"
+    ]
+  },
+  {
+    "objectID": "reference/lump_min.html",
+    "href": "reference/lump_min.html",
+    "title": "lump_min",
+    "section": "",
+    "text": "lump_min\nlump_min(fct, n, weights=None, other='Other')\nLump levels that appear fewer than n times in the series.",
+    "crumbs": [
+      "Reference",
+      "Level values",
+      "lump_min"
+    ]
+  },
+  {
+    "objectID": "reference/relevel.html",
+    "href": "reference/relevel.html",
+    "title": "relevel",
+    "section": "",
+    "text": "relevel\nrelevel(fct, *args, func=None, index=math.inf)\nManually change the order of levels in a factor.",
+    "crumbs": [
+      "Reference",
+      "Level order",
+      "relevel"
+    ]
+  },
+  {
+    "objectID": "reference/rev.html",
+    "href": "reference/rev.html",
+    "title": "rev",
+    "section": "",
+    "text": "rev(fct)\nReverse the order of a factor’s levels.\n\n\n\nfct : PlSeries\n\nA Series\n\n\n\n\n\n&gt;&gt;&gt; import pandas as pd\n&gt;&gt;&gt; import catfact as fct\n&gt;&gt;&gt; cat = pd.Categorical([\"a\", \"b\", \"c\"])\n&gt;&gt;&gt; cat\n['a', 'b', 'c']\nCategories (3, object): ['a', 'b', 'c']\n&gt;&gt;&gt; fct.rev(cat)\n['a', 'b', 'c']\nCategories (3, object): ['c', 'b', 'a']",
+    "crumbs": [
+      "Reference",
+      "Level order",
+      "rev"
+    ]
+  },
+  {
+    "objectID": "reference/rev.html#parameters",
+    "href": "reference/rev.html#parameters",
+    "title": "rev",
+    "section": "",
+    "text": "fct : PlSeries\n\nA Series",
+    "crumbs": [
+      "Reference",
+      "Level order",
+      "rev"
+    ]
+  },
+  {
+    "objectID": "reference/rev.html#examples",
+    "href": "reference/rev.html#examples",
+    "title": "rev",
+    "section": "",
+    "text": "&gt;&gt;&gt; import pandas as pd\n&gt;&gt;&gt; import catfact as fct\n&gt;&gt;&gt; cat = pd.Categorical([\"a\", \"b\", \"c\"])\n&gt;&gt;&gt; cat\n['a', 'b', 'c']\nCategories (3, object): ['a', 'b', 'c']\n&gt;&gt;&gt; fct.rev(cat)\n['a', 'b', 'c']\nCategories (3, object): ['c', 'b', 'a']",
+    "crumbs": [
+      "Reference",
+      "Level order",
+      "rev"
+    ]
+  },
+  {
+    "objectID": "reference/lump_lowfreq.html",
+    "href": "reference/lump_lowfreq.html",
+    "title": "lump_lowfreq",
+    "section": "",
+    "text": "lump_lowfreq\nlump_lowfreq(fct, other='Other')\nLump low frequency level, keeping other the smallest level.",
+    "crumbs": [
+      "Reference",
+      "Level values",
+      "lump_lowfreq"
+    ]
+  },
+  {
+    "objectID": "reference/infreq.html",
+    "href": "reference/infreq.html",
+    "title": "infreq",
+    "section": "",
+    "text": "infreq(fct, ordered=None)\nReturn a factor with categories ordered by frequency (largest first)\n\n\n\nfct : PlSeries\n\nA Series or Expression\n\nordered : bool = None\n\nWhether to return an ordered categorical. By default a Categorical inputs’ ordered setting is respected. Use this to override it.\n\n\n\n\n\nfct.inorder : Order categories by when they’re first observed.\n\n\n\n&gt;&gt;&gt; import pandas as pd\n&gt;&gt;&gt; import catfact as fct\n&gt;&gt;&gt; fct.infreq(pd.Categorical([\"c\", \"a\", \"c\", \"c\", \"a\", \"b\"]))\n['c', 'a', 'c', 'c', 'a', 'b']\nCategories (3, object): ['c', 'a', 'b']",
+    "crumbs": [
+      "Reference",
+      "Level order",
+      "infreq"
+    ]
+  },
+  {
+    "objectID": "reference/infreq.html#parameters",
+    "href": "reference/infreq.html#parameters",
+    "title": "infreq",
+    "section": "",
+    "text": "fct : PlSeries\n\nA Series or Expression\n\nordered : bool = None\n\nWhether to return an ordered categorical. By default a Categorical inputs’ ordered setting is respected. Use this to override it.",
+    "crumbs": [
+      "Reference",
+      "Level order",
+      "infreq"
+    ]
+  },
+  {
+    "objectID": "reference/infreq.html#see-also",
+    "href": "reference/infreq.html#see-also",
+    "title": "infreq",
+    "section": "",
+    "text": "fct.inorder : Order categories by when they’re first observed.",
+    "crumbs": [
+      "Reference",
+      "Level order",
+      "infreq"
+    ]
+  },
+  {
+    "objectID": "reference/infreq.html#examples",
+    "href": "reference/infreq.html#examples",
+    "title": "infreq",
+    "section": "",
+    "text": "&gt;&gt;&gt; import pandas as pd\n&gt;&gt;&gt; import catfact as fct\n&gt;&gt;&gt; fct.infreq(pd.Categorical([\"c\", \"a\", \"c\", \"c\", \"a\", \"b\"]))\n['c', 'a', 'c', 'c', 'a', 'b']\nCategories (3, object): ['c', 'a', 'b']",
+    "crumbs": [
+      "Reference",
+      "Level order",
+      "infreq"
+    ]
+  },
+  {
+    "objectID": "reference/index.html",
+    "href": "reference/index.html",
+    "title": "Function reference",
+    "section": "",
+    "text": "Keep the values of the levels the same, but change their order. These are particularly useful for models, tables, and visualisations.\n\n\n\ninorder\nReturn factor with categories ordered by when they first appear.\n\n\ninfreq\nReturn a factor with categories ordered by frequency (largest first)\n\n\ninseq\nReturn a factor with categories ordered lexically (alphabetically).\n\n\nrelevel\nManually change the order of levels in a factor.\n\n\nreorder\nReturn copy of fct, with categories reordered according to values in x.\n\n\nrev\nReverse the order of a factor’s levels.\n\n\n\n\n\n\nChange factor levels, while preserving order (as much as possible).\n\n\n\ncollapse\nReturn copy of fct with categories renamed. Optionally group all others.\n\n\nrecode\nReturn copy of fct with renamed categories.\n\n\nlump_min\nLump levels that appear fewer than n times in the series.\n\n\nlump_n\nLump all levels except the n most frequent.\n\n\nlump_prop\nLump levels that appear in fewer than some proportion in the series.\n\n\nlump_lowfreq\nLump low frequency level, keeping other the smallest level.\n\n\n\n\n\n\n\n\n\nfactor\nCreate a factor, a categorical series whose level order can be specified.\n\n\ncats\nReturn the levels of a categorical series.\n\n\n\n\n\n\nExample datasets used to illustrate this package.\nUse the .to_polars() or .to_pandas() methods to return a specific DataFrame. Moreover, you can import DataFrames directly. E.g. from catfact.data.polars import gdp.\n\n\n\ndata.gdp\nGross Domestic Product (GDP) by country.\n\n\ndata.ratings\nCleaned up ratings data.\n\n\ndata.ratings_messy\nMessy ratings data.\n\n\ndata.starwars\nStar Wars character data.",
+    "crumbs": [
+      "Reference",
+      "Function reference"
+    ]
+  },
+  {
+    "objectID": "reference/index.html#level-order",
+    "href": "reference/index.html#level-order",
+    "title": "Function reference",
+    "section": "",
+    "text": "Keep the values of the levels the same, but change their order. These are particularly useful for models, tables, and visualisations.\n\n\n\ninorder\nReturn factor with categories ordered by when they first appear.\n\n\ninfreq\nReturn a factor with categories ordered by frequency (largest first)\n\n\ninseq\nReturn a factor with categories ordered lexically (alphabetically).\n\n\nrelevel\nManually change the order of levels in a factor.\n\n\nreorder\nReturn copy of fct, with categories reordered according to values in x.\n\n\nrev\nReverse the order of a factor’s levels.",
+    "crumbs": [
+      "Reference",
+      "Function reference"
+    ]
+  },
+  {
+    "objectID": "reference/index.html#level-values",
+    "href": "reference/index.html#level-values",
+    "title": "Function reference",
+    "section": "",
+    "text": "Change factor levels, while preserving order (as much as possible).\n\n\n\ncollapse\nReturn copy of fct with categories renamed. Optionally group all others.\n\n\nrecode\nReturn copy of fct with renamed categories.\n\n\nlump_min\nLump levels that appear fewer than n times in the series.\n\n\nlump_n\nLump all levels except the n most frequent.\n\n\nlump_prop\nLump levels that appear in fewer than some proportion in the series.\n\n\nlump_lowfreq\nLump low frequency level, keeping other the smallest level.",
+    "crumbs": [
+      "Reference",
+      "Function reference"
+    ]
+  },
+  {
+    "objectID": "reference/index.html#other-helpers",
+    "href": "reference/index.html#other-helpers",
+    "title": "Function reference",
+    "section": "",
+    "text": "factor\nCreate a factor, a categorical series whose level order can be specified.\n\n\ncats\nReturn the levels of a categorical series.",
+    "crumbs": [
+      "Reference",
+      "Function reference"
+    ]
+  },
+  {
+    "objectID": "reference/index.html#datasets",
+    "href": "reference/index.html#datasets",
+    "title": "Function reference",
+    "section": "",
+    "text": "Example datasets used to illustrate this package.\nUse the .to_polars() or .to_pandas() methods to return a specific DataFrame. Moreover, you can import DataFrames directly. E.g. from catfact.data.polars import gdp.\n\n\n\ndata.gdp\nGross Domestic Product (GDP) by country.\n\n\ndata.ratings\nCleaned up ratings data.\n\n\ndata.ratings_messy\nMessy ratings data.\n\n\ndata.starwars\nStar Wars character data.",
+    "crumbs": [
+      "Reference",
+      "Function reference"
+    ]
+  },
+  {
+    "objectID": "reference/inorder.html",
+    "href": "reference/inorder.html",
+    "title": "inorder",
+    "section": "",
+    "text": "inorder(fct, ordered=None)\nReturn factor with categories ordered by when they first appear.\n\n\n\nfct : list - like\n\nA pandas Series, Categorical, or list-like object\n\nordered : bool = None\n\nWhether to return an ordered categorical. By default a Categorical inputs’ ordered setting is respected. Use this to override it.\n\n\n\n\n\nfct.infreq : Order categories by value frequency count.\n\n\n\n&gt;&gt;&gt; import pandas as pd\n&gt;&gt;&gt; import catfact as fct\n&gt;&gt;&gt; cat = pd.Categorical([\"c\", \"a\", \"b\"])\n&gt;&gt;&gt; cat\n['c', 'a', 'b']\nCategories (3, object): ['a', 'b', 'c']\nNote that above the categories are sorted alphabetically. Use fct.inorder to keep the categories in first-observed order.\n&gt;&gt;&gt; fct.inorder(cat)\n['c', 'a', 'b']\nCategories (3, object): ['c', 'a', 'b']\nBy default, the ordered setting of categoricals is respected. Use the ordered parameter to override it.\n&gt;&gt;&gt; cat2 = pd.Categorical([\"z\", \"a\", \"b\"], ordered=True)\n&gt;&gt;&gt; fct.inorder(cat2)\n['z', 'a', 'b']\nCategories (3, object): ['z' &lt; 'a' &lt; 'b']\n&gt;&gt;&gt; fct.inorder(cat2, ordered=False)\n['z', 'a', 'b']\nCategories (3, object): ['z', 'a', 'b']",
+    "crumbs": [
+      "Reference",
+      "Level order",
+      "inorder"
+    ]
+  },
+  {
+    "objectID": "reference/inorder.html#parameters",
+    "href": "reference/inorder.html#parameters",
+    "title": "inorder",
+    "section": "",
+    "text": "fct : list - like\n\nA pandas Series, Categorical, or list-like object\n\nordered : bool = None\n\nWhether to return an ordered categorical. By default a Categorical inputs’ ordered setting is respected. Use this to override it.",
+    "crumbs": [
+      "Reference",
+      "Level order",
+      "inorder"
+    ]
+  },
+  {
+    "objectID": "reference/inorder.html#see-also",
+    "href": "reference/inorder.html#see-also",
+    "title": "inorder",
+    "section": "",
+    "text": "fct.infreq : Order categories by value frequency count.",
+    "crumbs": [
+      "Reference",
+      "Level order",
+      "inorder"
+    ]
+  },
+  {
+    "objectID": "reference/inorder.html#examples",
+    "href": "reference/inorder.html#examples",
+    "title": "inorder",
+    "section": "",
+    "text": "&gt;&gt;&gt; import pandas as pd\n&gt;&gt;&gt; import catfact as fct\n&gt;&gt;&gt; cat = pd.Categorical([\"c\", \"a\", \"b\"])\n&gt;&gt;&gt; cat\n['c', 'a', 'b']\nCategories (3, object): ['a', 'b', 'c']\nNote that above the categories are sorted alphabetically. Use fct.inorder to keep the categories in first-observed order.\n&gt;&gt;&gt; fct.inorder(cat)\n['c', 'a', 'b']\nCategories (3, object): ['c', 'a', 'b']\nBy default, the ordered setting of categoricals is respected. Use the ordered parameter to override it.\n&gt;&gt;&gt; cat2 = pd.Categorical([\"z\", \"a\", \"b\"], ordered=True)\n&gt;&gt;&gt; fct.inorder(cat2)\n['z', 'a', 'b']\nCategories (3, object): ['z' &lt; 'a' &lt; 'b']\n&gt;&gt;&gt; fct.inorder(cat2, ordered=False)\n['z', 'a', 'b']\nCategories (3, object): ['z', 'a', 'b']",
+    "crumbs": [
+      "Reference",
+      "Level order",
+      "inorder"
+    ]
+  }
+]
