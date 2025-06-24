@@ -29,13 +29,11 @@ pip install catfact
 ## Import and basic use
 
 ```{python}
-# import as fct for convenience ----
-import catfact as fct
-from catfact.polars.data import gdp, ratings, starwars
-
-# catfact works well with Polars and Plotnine ----
 import polars as pl
-from plotnine import ggplot, aes, geom_bar, geom_line, labs, coord_flip
+import catfact as fct
+
+# example data
+from catfact.polars.data import gdp, ratings, starwars
 ```
 
 Suppose you have a Polars Categorical Series. You can get the category levels with `.cat.get_categories()`. 
@@ -75,6 +73,8 @@ In the following sections, we'll look at examples of four of the most useful fun
 For example, the plot below counts starwars character by eye color, but the bars are ordered alphabetically by default.
 
 ```{python}
+from plotnine import ggplot, aes, geom_bar, coord_flip
+
 (
     starwars
     >> ggplot(aes("eye_color"))
@@ -105,6 +105,8 @@ The code below uses `fct.infreq()` with the Polars `~~.pl.DataFrame.with_columns
 Here it's used to cut down the number of eye colors to 8, lumping the rest into "Other".
 
 ```{python}
+from plotnine import ggplot, aes, geom_bar
+
 (
     starwars
     .with_columns(
@@ -125,7 +127,8 @@ For example, the line chart below shows GDP over time for several countries. The
 ```{python}
 #| eval: false
 #| echo: false
-# reorder
+from plotnine import ggplot, aes, geom_line, labs
+
 (
     gdp
     >> ggplot(aes("year", "gdp", color="country"))
