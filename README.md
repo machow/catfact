@@ -1,8 +1,6 @@
 # catfact
 
 
-    <function __main__.<lambda>(df)>
-
 Categorical wrangling for Python. Supports both Polars and Pandas.
 Enables categorical and ordinal scales in plotting tools like Plotnine.
 
@@ -44,11 +42,11 @@ from catfact.polars.data import starwars
 | "black"         | 10  |
 | "orange"        | 8   |
 | …               | …   |
-| "green, yellow" | 1   |
-| "pink"          | 1   |
-| "red, blue"     | 1   |
 | "white"         | 1   |
+| "pink"          | 1   |
 | "blue-gray"     | 1   |
+| "green, yellow" | 1   |
+| "dark"          | 1   |
 
 </div>
 

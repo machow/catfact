@@ -16,11 +16,10 @@ def strip_style_tags(html: str):
 
 
 html_formatter = get_ipython().display_formatter.formatters["text/html"]
-html_formatter.for_type(
+_ = html_formatter.for_type(
     pl.DataFrame,
     lambda df: strip_style_tags(df._repr_html_()),
 )
-
 ```
 
 Categorical wrangling for Python. Supports both Polars and Pandas. Enables categorical and ordinal scales in plotting tools like Plotnine.
