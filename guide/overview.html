@@ -250,7 +250,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </section>
 <section id="import-and-basic-use" class="level2">
 <h2 class="anchored" data-anchor-id="import-and-basic-use">Import and basic use</h2>
-<div id="674ad8c6" class="cell" data-execution_count="1">
+<div id="ca711e28" class="cell" data-execution_count="1">
 <div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co"># import as fct for convenience ----</span></span>
 <span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> catfact <span class="im">as</span> fct</span>
 <span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> catfact.polars.data <span class="im">import</span> gdp, ratings, starwars</span>
@@ -260,7 +260,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> plotnine <span class="im">import</span> ggplot, aes, geom_bar, geom_line, labs, coord_flip</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>Suppose you have a Polars Categorical Series. You can get the category levels with <code>.cat.get_categories()</code>.</p>
-<div id="7840b6e9" class="cell" data-execution_count="2">
+<div id="9e2838f8" class="cell" data-execution_count="2">
 <div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>counts <span class="op">=</span> pl.Series([<span class="st">"z"</span>, <span class="st">"z"</span>, <span class="st">"a"</span>, <span class="st">"b"</span>], dtype<span class="op">=</span>pl.Categorical)</span>
 <span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>counts.cat.get_categories().to_list()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="2">
@@ -269,7 +269,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 <p>Notice that the categories are ordered by when they first appear. Since <code>"z"</code> is the first element of the Series, it’s also the first category.</p>
 <p>catfact provides functions like <a href="../reference/inseq.html#catfact.inseq" title="0"><code>fct.inseq()</code></a>, which orders categories alphabetically, and <a href="../reference/cats.html#catfact.cats" title="0"><code>fct.cats()</code></a> as a shorthand for <code>.cat.get_categories()</code>.</p>
-<div id="af743f26" class="cell" data-execution_count="3">
+<div id="c883f267" class="cell" data-execution_count="3">
 <div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>count_seq <span class="op">=</span> fct.inseq(counts)</span>
 <span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>fct.cats(count_seq).to_list()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="3">
@@ -287,7 +287,7 @@ Using the Polars fct namespace
 </div>
 <div class="callout-body-container callout-body">
 <p>catfact provides a <code>.fct</code> namespace for working with Polars Series.</p>
-<div id="668535ea" class="cell" data-execution_count="4">
+<div id="f55b2f15" class="cell" data-execution_count="4">
 <div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> catfact.polars</span>
 <span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>counts.fct.inseq().fct.cats().to_list()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
@@ -303,7 +303,7 @@ Using the Polars fct namespace
 <h2 class="anchored" data-anchor-id="fct.infreq">fct.infreq</h2>
 <p><a href="../reference/infreq.html#catfact.infreq" title="0"><code>fct.infreq()</code></a> reorders categories by frequency. This is useful combined with Plotnine, to order bars in a bar chart.</p>
 <p>For example, the plot below counts starwars character by eye color, but the bars are ordered alphabetically by default.</p>
-<div id="cb1582fd" class="cell" data-execution_count="5">
+<div id="ef745a73" class="cell" data-execution_count="5">
 <div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>(</span>
 <span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>    starwars</span>
 <span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>    <span class="op">&gt;&gt;</span> ggplot(aes(<span class="st">"eye_color"</span>))</span>
@@ -319,7 +319,7 @@ Using the Polars fct namespace
 </div>
 </div>
 <p>The code below uses <a href="../reference/infreq.html#catfact.infreq" title="0"><code>fct.infreq()</code></a> with the Polars <code>pl.DataFrame.with_columns</code> method to order the <code>eye_color</code> column’s categories by frequency. Plotnine knows to use the categories to order the bars.</p>
-<div id="912e7e50" class="cell" data-execution_count="6">
+<div id="14a5485a" class="cell" data-execution_count="6">
 <div class="sourceCode cell-code" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>(</span>
 <span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>    starwars</span>
 <span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>    .with_columns(</span>
@@ -342,7 +342,7 @@ Using the Polars fct namespace
 <h2 class="anchored" data-anchor-id="fct.lump_n">fct.lump_n</h2>
 <p><a href="../reference/lump_n.html#catfact.lump_n" title="0"><code>fct.lump_n()</code></a> combines infrequent categories into a single category, called “Other” by default. This is useful for cutting down the number of bars in a plot.</p>
 <p>Here it’s used to cut down the number of eye colors to 8, lumping the rest into “Other”.</p>
-<div id="a891c2d8" class="cell" data-execution_count="7">
+<div id="8bd10656" class="cell" data-execution_count="7">
 <div class="sourceCode cell-code" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>(</span>
 <span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>    starwars</span>
 <span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>    .with_columns(</span>
@@ -367,7 +367,7 @@ Using the Polars fct namespace
 <p><img src="./assets/gdp-reorder-motivation.png" class="img-fluid"></p>
 <p>Notice that China is the top entry, but ends as the second highest line. The United States is the last entry, but ends as the highest line. The black lines show how far apart the legend entries are from their lines.</p>
 <p>The code below fixes the legend. It uses <a href="../reference/reorder.html#catfact.reorder" title="0"><code>fct.reorder()</code></a> to reorder the <code>country</code> column by calculating <code>pl.element().max()</code> on the <code>gdp</code> column.</p>
-<div id="804fdcc7" class="cell" data-execution_count="9">
+<div id="41dc2307" class="cell" data-execution_count="9">
 <div class="sourceCode cell-code" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>(</span>
 <span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>    gdp</span>
 <span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>    .with_columns(</span>
@@ -395,7 +395,7 @@ Using the Polars fct namespace
 <h2 class="anchored" data-anchor-id="fct.relevel">fct.relevel</h2>
 <p><a href="../reference/relevel.html#catfact.relevel" title="0"><code>fct.relevel()</code></a> reorders categories based on a manual order. This is useful when you want to display categories in a specific order, like a scale from “very-bad” to “very-good”.</p>
 <p>The code below counts <code>ratings</code> data provided by catfact. However, the order of the counts don’t match the order you’d expect from a ratings scale.</p>
-<div id="ed1e30a5" class="cell" data-execution_count="10">
+<div id="a622ea74" class="cell" data-execution_count="10">
 <div class="sourceCode cell-code" id="cb13"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>(</span>
 <span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>  ratings</span>
 <span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>  .group_by(<span class="st">"rating"</span>)</span>
@@ -409,11 +409,11 @@ Using the Polars fct namespace
   white-space: pre-wrap;
 }
 </style>
-<small>shape: (5, 2)</small><table class="dataframe table table-sm table-striped small"><thead><tr><th>rating</th><th>len</th></tr><tr><td>str</td><td>u32</td></tr></thead><tbody><tr><td>"very-bad"</td><td>1</td></tr><tr><td>"bad"</td><td>1</td></tr><tr><td>"very-good"</td><td>2</td></tr><tr><td>"good"</td><td>3</td></tr><tr><td>"neutral"</td><td>4</td></tr></tbody></table></div>
+<small>shape: (5, 2)</small><table class="dataframe table table-sm table-striped small"><thead><tr><th>rating</th><th>len</th></tr><tr><td>str</td><td>u32</td></tr></thead><tbody><tr><td>"neutral"</td><td>4</td></tr><tr><td>"very-good"</td><td>2</td></tr><tr><td>"bad"</td><td>1</td></tr><tr><td>"very-bad"</td><td>1</td></tr><tr><td>"good"</td><td>3</td></tr></tbody></table></div>
 </div>
 </div>
 <p>Notice that “neutral” is first, but often you want to start with “very-bad” and end with “very-good”. By passing in a new order to <a href="../reference/relevel.html#catfact.relevel" title="0"><code>fct.relevel()</code></a>, you can manually set the correct order of categories.</p>
-<div id="0895ff29" class="cell" data-execution_count="11">
+<div id="20d24888" class="cell" data-execution_count="11">
 <div class="sourceCode cell-code" id="cb14"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>new_order <span class="op">=</span> [<span class="st">"very-bad"</span>, <span class="st">"bad"</span>, <span class="st">"neutral"</span>, <span class="st">"good"</span>, <span class="st">"very-good"</span>]</span>
 <span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>fixed_counts <span class="op">=</span> (</span>
@@ -439,7 +439,7 @@ Using the Polars fct namespace
 </div>
 </div>
 <p>A key here is that Polars uses the category levels when doing <code>.sort("rating")</code>. Here are the categories listed.</p>
-<div id="929eaf58" class="cell" data-execution_count="12">
+<div id="72c76b95" class="cell" data-execution_count="12">
 <div class="sourceCode cell-code" id="cb15"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>fct.cats(fixed_counts[<span class="st">"rating"</span>]).to_list()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="11">
 <pre><code>['very-bad', 'bad', 'neutral', 'good', 'very-good']</code></pre>
