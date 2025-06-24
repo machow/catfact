@@ -7,13 +7,6 @@ build-backend = "setuptools.build_meta"
 [tool.setuptools.packages.find]
 include = ["catfact"]
 
-[tool.ruff]
-line-length = 100
-
-[tool.ruff.lint]
-
-[tool.ruff.format]
-
 [project]
 name = "catfact"
 description = "Add your description here"
@@ -25,16 +18,32 @@ dynamic = ["version"]
 dependencies = [
     "databackend>=0.0.3",
     "ddispatch>=0.0.1",
+    "polars",
 ]
+
 
 [dependency-groups]
 dev = [
     "ipykernel>=6.29.5",
+    "nbclient>=0.10.2",
+    "nbformat>=5.10.4",
     "pandas>=2.2.3",
     "plotnine>=0.13.6",
     "polars>=1.27.1",
     "pre-commit>=4.2.0",
+    "pyarrow>=20.0.0",
     "pytest>=8.3.5",
     "quartodoc>=0.9.1",
     "ruff>=0.11.8",
 ]
+
+[tool.ruff]
+line-length = 100
+
+[tool.ruff.lint]
+ignore = ["F811"]
+
+[tool.ruff.format]
+
+[tool.pytest.ini_options]
+addopts = "--doctest-modules"

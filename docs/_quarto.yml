@@ -1,10 +1,32 @@
 project:
   type: website
-  pre-render: uv run quartodoc build --verbose
+  #pre-render: uv run quartodoc build --verbose
 
 # tell quarto to read the generated sidebar
 metadata-files:
   - reference/_sidebar.yml
+
+filters:
+  - interlinks
+
+website:
+  title: catfact
+  navbar:
+    left:
+      - text: Get Started
+        href: guide/overview.qmd
+      - text: Reference
+        href: reference/index.qmd
+  sidebar:
+    - id: Get Started
+      title: Get Started
+      contents:
+      - file: guide/overview.qmd
+      - section: Frame libraries
+        contents:
+          - file: guide/fct-namespace.qmd
+          - file: guide/polars.qmd
+          - file: guide/pandas.qmd
 
 # tell quarto to read the generated styles
 format:
@@ -12,9 +34,17 @@ format:
     toc: true
     css:
       - reference/_styles-quartodoc.css
+      - styles.css
 
 interlinks:
   fast: true
+  autolink: true
+  aliases:
+    catfact: fct
+    polars: pl
+  sources:
+    polars:
+      url: "https://docs.pola.rs/api/python/stable/"
 
 quartodoc:
   # the name used to import the package you want to create reference docs for
@@ -37,13 +67,33 @@ quartodoc:
       contents:
         - inorder
         - infreq
-        - reorder
+        - inseq
+        - relevel
+        - name: reorder
+          dynamic: true   # works around shadowing
+        - rev
     - title: Level values
       desc: |
         Change factor levels, while preserving order (as much as possible).
       contents:
+        - collapse
         - recode
+        - lump_min
+        - lump_n
+        - lump_prop
+        - lump_lowfreq
     - title: Other helpers
       contents:
         - factor
         - cats
+    - title: Datasets
+      desc: |
+        Example datasets used to illustrate this package.
+
+        Use the `.to_polars()` or `.to_pandas()` methods to return a specific DataFrame.
+        Moreover, you can import DataFrames directly. E.g. `from catfact.data.polars import gdp`.
+      contents:
+        - data.gdp
+        - data.ratings
+        - data.ratings_messy
+        - data.starwars
