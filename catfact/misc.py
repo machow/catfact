@@ -1,8 +1,7 @@
 from __future__ import annotations
 
-import polars as pl
 
-from ._databackend import PdSeriesOrCat, PlSeries, PlExpr
+from ._databackend import polars as pl, PdSeriesOrCat, PlSeries, PlExpr
 from ddispatch import dispatch
 from typing import Any, Callable, ParamSpec, Concatenate
 

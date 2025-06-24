@@ -9,7 +9,7 @@ from .misc import (
     factor,
     is_ordered,
 )
-from ._databackend import polars as pl, PdSeriesOrCat, PlSeries, PlFrame, PlExpr
+from ._databackend import polars as pl, pandas as pd, PdSeriesOrCat, PlSeries, PlFrame, PlExpr
 from typing import Callable
 
 
@@ -26,8 +26,6 @@ def inorder(fct: PlExpr, ordered: bool | None = None) -> PlExpr:
 
 @dispatch
 def inorder(fct: PdSeriesOrCat, ordered: bool | None = None) -> PdSeriesOrCat:
-    import pandas as pd
-
     if ordered is None:
         ordered = is_ordered(fct)
 
@@ -111,8 +109,6 @@ def infreq(fct: PlExpr, ordered: bool | None = None) -> PlExpr:
 
 @dispatch
 def infreq(fct: PdSeriesOrCat, ordered: bool | None = None) -> PdSeriesOrCat:
-    import pandas as pd
-
     if ordered is None:
         ordered = is_ordered(fct)
 
@@ -256,7 +252,6 @@ def reorder(fct: PlExpr, x: PlExpr, func: PlExpr | None = None, desc: bool = Fal
 @dispatch
 def reorder(fct: PdSeriesOrCat, x, func="median", desc=False) -> PdSeriesOrCat:
     # TODO: test this concrete implementation
-    import pandas as pd
 
     x_vals = x.values if isinstance(x, pd.Series) else x
     s = pd.Series(x_vals, index=fct)
@@ -328,8 +323,6 @@ def rev(fct: PlExpr) -> PlExpr:
 
 @dispatch
 def rev(fct: PdSeriesOrCat) -> PdSeriesOrCat:
-    import pandas as pd
-
     cat = pd.Categorical(fct)
 
     rev_levels = list(reversed(cat.categories))
