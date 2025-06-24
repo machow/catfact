@@ -22,34 +22,31 @@ import polars as pl
 import catfact as fct
 from catfact.polars.data import starwars
 
-starwars.group_by("eye_color").count().sort("count", descending=True)
+(
+    starwars
+    .group_by("eye_color")
+    .agg(pl.len())
+    .sort("len", descending=True)
+)
 ```
 
-    /var/folders/r4/5821nk2d3nv2q7vr8v6gg5f00000gn/T/ipykernel_52691/3587020825.py:5: DeprecationWarning: `GroupBy.count` was renamed; use `GroupBy.len` instead
-
-<div><style>
-.dataframe > thead > tr,
-.dataframe > tbody > tr {
-  text-align: right;
-  white-space: pre-wrap;
-}
-</style>
+<div>
 <small>shape: (15, 2)</small>
 
-| eye_color       | count |
-|-----------------|-------|
-| str             | u32   |
-| "brown"         | 21    |
-| "blue"          | 19    |
-| "yellow"        | 11    |
-| "black"         | 10    |
-| "orange"        | 8     |
-| …               | …     |
-| "green, yellow" | 1     |
-| "pink"          | 1     |
-| "white"         | 1     |
-| "blue-gray"     | 1     |
-| "gold"          | 1     |
+| eye_color   | len |
+|-------------|-----|
+| str         | u32 |
+| "brown"     | 21  |
+| "blue"      | 19  |
+| "yellow"    | 11  |
+| "black"     | 10  |
+| "orange"    | 8   |
+| …           | …   |
+| "gold"      | 1   |
+| "pink"      | 1   |
+| "dark"      | 1   |
+| "blue-gray" | 1   |
+| "white"     | 1   |
 
 </div>
 
@@ -63,7 +60,7 @@ from plotnine import ggplot, aes, geom_bar, coord_flip
 )
 ```
 
-<img src="README_files/figure-commonmark/cell-3-output-1.png"
+<img src="README_files/figure-commonmark/cell-4-output-1.png"
 width="640" height="480" />
 
 ``` python
@@ -75,5 +72,5 @@ width="640" height="480" />
 )
 ```
 
-<img src="README_files/figure-commonmark/cell-4-output-1.png"
+<img src="README_files/figure-commonmark/cell-5-output-1.png"
 width="640" height="480" />
