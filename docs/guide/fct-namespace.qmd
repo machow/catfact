@@ -1,3 +1,23 @@
 ---
 title: "`.fct` namespace"
+jupyter: python3
 ---
+
+Both Polars and Pandas support method chaining, using a custom `.fct` namespace. In order to use the namespace, you need to import `catfact.polars` or `catfact.pandas`, respectively.
+
+
+```{python}
+# required for using .fct namespace
+import catfact.polars
+```
+
+Here's an example of `.fct` namespace methods in action:
+
+```{python}
+import polars as pl
+
+ser = pl.Series(["a", "a", "b", "c"])
+
+# reverse category order
+ser.fct.rev().fct.cats()
+```

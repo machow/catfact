@@ -1,3 +1,44 @@
 ---
 title: Pandas
+jupyter: python3
 ---
+
+
+```{python}
+import catfact as fct  # for functions
+import catfact.pandas  # for .fct methods
+
+from catfact.pandas.data import starwars
+```
+
+
+```{python}
+# approach 1: functions
+fct.cats(fct.infreq(starwars["eye_color"]))
+
+# approach 2: .fct namespace methods
+starwars["eye_color"].fct.infreq().fct.cats()
+```
+
+## Ordered flag
+
+
+```{python}
+from catfact.pandas.data import ratings
+
+LEVELS = ["very-bad", "bad", "neutral", "good", "very-good"]
+
+
+ratings2 = ratings.assign(
+    rating_lvl=lambda d: d["rating"].fct.relevel(*LEVELS),
+    rating_ord=lambda d: d["rating_lvl"].fct.factor(ordered=True)
+)
+```
+
+```{python}
+# | layout-ncol: 2
+from plotnine import ggplot, aes, geom_bar
+
+ggplot(ratings2, aes("rating_lvl", fill="rating_lvl")) + geom_bar()
+ggplot(ratings2, aes("rating_ord", fill="rating_ord")) + geom_bar()
+```

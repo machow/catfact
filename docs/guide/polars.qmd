@@ -1,3 +1,59 @@
 ---
 title: Polars
 ---
+
+```{python}
+import polars as pl
+
+import catfact as fct  # for functions
+import catfact.polars  # for .fct methods
+
+from catfact.polars.data import starwars, gdp
+```
+
+
+```{python}
+# approach 1: functions
+fct.cats(fct.infreq(starwars["eye_color"]))
+
+# approach 2: .fct namespace methods
+starwars["eye_color"].fct.infreq().fct.cats()
+
+```
+
+## Lazy expressions
+
+```{python}
+starwars.select(pl.col("eye_color").fct.infreq().fct.cats())
+```
+
+## Computation expressions
+
+```{python}
+gdp["country"].fct.reorder(gdp["gdp"], pl.element().max()).fct.cats()
+```
+
+One big advantage of using the functions directly is that they can be partialed:
+
+
+```{python}
+from functools import partial
+
+f_lump_3 = partial(fct.lump_n, n=3)
+
+(
+    starwars
+    .select(f_lump_3(pl.col("eye_color")))
+    .group_by("eye_color")
+    .agg(pl.len())
+    .sort("eye_color")
+)
+```
+
+## Limitations
+
+Currently, Polars does not support the use of an `.ordered` flag on its Enums and Categoricals. In tools like Pandas (and factors in the R programming language), this flag is used to indicate ordinal scales (e.g. "low", "medium", "high", vs. "red", "green", "blue"). 
+
+Without this flag, plotting tools like Plotnine can't automatically provide pieces like sequential color palettes for ordinal scales (see [this Polars issue](https://github.com/pola-rs/polars/issues/19050)).
+
+See [this Pandas ordered example](./pandas.qmd#ordered-flag) for a plot that uses the `.ordered` flag.
