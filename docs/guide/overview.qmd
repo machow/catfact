@@ -144,6 +144,8 @@ Notice that China is the top entry, but ends as the second highest line. The Uni
 The code below fixes the legend. It uses `fct.reorder()` to reorder the `country` column by calculating `pl.element().max()` on the `gdp` column.
 
 ```{python}
+from plotnine import ggplot, aes, geom_line, labs
+
 (
     gdp
     .with_columns(
